@@ -1,0 +1,30 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "fizzy-mcp-web",
+  "compatibility_date": "2025-03-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "@tanstack/react-start/server-entry",
+  "observability": {
+    "enabled": true,
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "fizzy-mcp-db",
+      "database_id": "90bc3dc0-a6d9-4092-9028-b0404965585a",
+      "migrations_dir": "migrations",
+    },
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "KV",
+      "id": "109c381516064abdb7fe5816145119ad",
+    },
+  ],
+  "routes": [
+    {
+      "pattern": "fizzy.yogan.dev",
+      "custom_domain": true,
+    },
+  ],
+}

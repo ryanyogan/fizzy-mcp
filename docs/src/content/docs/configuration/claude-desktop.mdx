@@ -9,62 +9,166 @@ import { Aside, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
 
 This guide covers setting up Fizzy MCP with [Claude Desktop](https://claude.ai/download), Anthropic's official desktop application.
 
+## Deployment Modes
+
+Fizzy MCP supports two deployment modes:
+
+| Mode                     | Description                                   | Best For                                        |
+| ------------------------ | --------------------------------------------- | ----------------------------------------------- |
+| **Remote** (Recommended) | Connects to hosted Fizzy MCP service via HTTP | Most users, zero maintenance, always up-to-date |
+| **Local**                | Runs MCP server locally via npx               | Offline use, custom modifications, self-hosting |
+
+<Aside type="tip">
+  **Remote mode is recommended** for most users. It requires no local installation, receives
+  automatic updates, and provides the best reliability.
+</Aside>
+
 ## Auto-Configuration
 
-The easiest way to configure Claude Desktop is through the Fizzy MCP auth command:
+The easiest way to configure Claude Desktop is through the Fizzy MCP CLI:
 
 ```bash
 npx fizzy-do-mcp auth
 ```
 
-When prompted, select Claude Desktop for automatic configuration.
+Or use the configure command directly:
+
+```bash
+npx fizzy-do-mcp configure
+```
+
+When prompted, select Claude Desktop for automatic configuration. The CLI will detect the best mode for your setup.
+
+## Configuration File Location
+
+<Tabs>
+<TabItem label="macOS">
+
+```
+~/Library/Application Support/Claude/claude_desktop_config.json
+```
+
+</TabItem>
+<TabItem label="Windows">
+
+```
+%APPDATA%\Claude\claude_desktop_config.json
+```
+
+</TabItem>
+<TabItem label="Linux">
+
+```
+~/.config/Claude/claude_desktop_config.json
+```
+
+</TabItem>
+</Tabs>
 
 ## Manual Configuration
 
-If auto-configuration doesn't work, follow these steps:
+Choose your deployment mode and add the configuration to your Claude Desktop config file:
 
-<Steps>
+<Tabs>
+<TabItem label="Remote Mode (Recommended)">
 
-1. **Locate the configuration file**
+Remote mode connects to the hosted Fizzy MCP service via HTTP transport.
 
-   <Tabs>
-     <TabItem label="macOS">
-       ```
-       ~/Library/Application Support/Claude/claude_desktop_config.json
-       ```
-     </TabItem>
-     <TabItem label="Windows">
-       ```
-       %APPDATA%\Claude\claude_desktop_config.json
-       ```
-     </TabItem>
-     <TabItem label="Linux">
-       ```
-       ~/.config/Claude/claude_desktop_config.json
-       ```
-     </TabItem>
-   </Tabs>
+### Basic Remote Configuration
 
-2. **Create or edit the file**
+```json
+{
+  "mcpServers": {
+    "fizzy": {
+      "transport": "http",
+      "url": "https://fizzy-mcp-hosted.ryanyogan.workers.dev/mcp",
+      "headers": {
+        "X-Fizzy-Token": "your-fizzy-token"
+      }
+    }
+  }
+}
+```
 
-   If the file doesn't exist, create it. Add the Fizzy MCP server:
+### Remote Configuration with All Headers
 
-   ```json
-   {
-     "mcpServers": {
-       "fizzy": {
-         "command": "npx",
-         "args": ["-y", "fizzy-do-mcp@latest"]
-       }
-     }
-   }
-   ```
+```json
+{
+  "mcpServers": {
+    "fizzy": {
+      "transport": "http",
+      "url": "https://fizzy-mcp-hosted.ryanyogan.workers.dev/mcp",
+      "headers": {
+        "X-Fizzy-Token": "your-fizzy-token",
+        "X-Fizzy-Account-Slug": "/my-org",
+        "X-API-Key": "fmcp_your_api_key"
+      }
+    }
+  }
+}
+```
 
-3. **Restart Claude Desktop**
+</TabItem>
+<TabItem label="Local Mode">
 
-   Completely close and reopen Claude Desktop to load the new configuration.
+Local mode runs the MCP server on your machine via stdio.
 
-</Steps>
+### Basic Local Configuration
+
+```json
+{
+  "mcpServers": {
+    "fizzy": {
+      "command": "npx",
+      "args": ["-y", "fizzy-do-mcp@latest"]
+    }
+  }
+}
+```
+
+### Local Configuration with Environment Variables
+
+```json
+{
+  "mcpServers": {
+    "fizzy": {
+      "command": "npx",
+      "args": ["-y", "fizzy-do-mcp@latest"],
+      "env": {
+        "FIZZY_ACCESS_TOKEN": "your-fizzy-token",
+        "FIZZY_ACCOUNT_SLUG": "/my-org"
+      }
+    }
+  }
+}
+```
+
+</TabItem>
+</Tabs>
+
+After adding the configuration, completely close and reopen Claude Desktop to load the new settings.
+
+## Remote Mode Headers
+
+When using remote mode, the following headers are available:
+
+| Header                 | Required | Description                                              |
+| ---------------------- | -------- | -------------------------------------------------------- |
+| `X-Fizzy-Token`        | **Yes**  | Your Fizzy personal access token (from app.fizzy.do)     |
+| `X-Fizzy-Account-Slug` | No       | Account slug like `/my-org` to select a specific account |
+| `X-API-Key`            | No       | API key for higher rate limits (prefix: `fmcp_`)         |
+
+<Aside>
+  To get your Fizzy token, visit [app.fizzy.do](https://app.fizzy.do), go to Settings > Personal Access Tokens, and create a new token.
+</Aside>
+
+### Getting an API Key
+
+API keys provide higher rate limits for power users. To obtain one:
+
+1. Contact Fizzy support or visit the API dashboard
+2. API keys are prefixed with `fmcp_` (e.g., `fmcp_abc123xyz...`)
+3. Add the key to your configuration's `X-API-Key` header
 
 ## Verifying the Connection
 
@@ -80,7 +184,7 @@ Try asking Claude:
 
 ## Configuration Options
 
-### Using a Global Installation
+### Using a Global Installation (Local Mode Only)
 
 If you installed Fizzy MCP globally:
 
@@ -94,19 +198,47 @@ If you installed Fizzy MCP globally:
 }
 ```
 
-### Authentication
+### Authentication for Local Mode
 
-After configuring Claude Desktop, authenticate with Fizzy:
+When using local mode, authenticate with Fizzy:
 
 ```bash
 npx fizzy-do-mcp auth
 ```
 
-This stores your credentials securely in `~/.config/fizzy-mcp/config.json` (mode 0600). No need to put tokens in your MCP config.
+This stores your credentials securely in `~/.config/fizzy-mcp/config.json` (mode 0600). No need to put tokens in your MCP config unless you prefer explicit configuration.
 
 ### Multiple MCP Servers
 
 You can run Fizzy alongside other MCP servers:
+
+<Tabs>
+<TabItem label="Mixed Remote/Local">
+
+```json
+{
+  "mcpServers": {
+    "fizzy": {
+      "transport": "http",
+      "url": "https://fizzy-mcp-hosted.ryanyogan.workers.dev/mcp",
+      "headers": {
+        "X-Fizzy-Token": "your-fizzy-token"
+      }
+    },
+    "github": {
+      "command": "npx",
+      "args": ["@github/mcp-server"]
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-filesystem"]
+    }
+  }
+}
+```
+
+</TabItem>
+<TabItem label="All Local">
 
 ```json
 {
@@ -127,6 +259,9 @@ You can run Fizzy alongside other MCP servers:
 }
 ```
 
+</TabItem>
+</Tabs>
+
 ## Troubleshooting
 
 ### Tools not appearing
@@ -136,7 +271,15 @@ You can run Fizzy alongside other MCP servers:
 3. Ensure you've restarted Claude Desktop completely
 4. Check Claude Desktop logs for MCP connection errors
 
-### "Not authenticated" errors
+### "Not authenticated" errors (Remote Mode)
+
+Verify your `X-Fizzy-Token` header is correct:
+
+1. Check that the token is valid at [app.fizzy.do](https://app.fizzy.do)
+2. Ensure there are no extra spaces or quotes around the token
+3. Regenerate the token if needed
+
+### "Not authenticated" errors (Local Mode)
 
 Run `fizzy-mcp auth` to set up or refresh your credentials:
 
@@ -144,15 +287,19 @@ Run `fizzy-mcp auth` to set up or refresh your credentials:
 npx fizzy-do-mcp auth
 ```
 
-### Connection timeouts
+### Connection timeouts (Remote Mode)
 
-If you see timeout errors:
+1. Check your internet connection
+2. Verify the hosted service is accessible: `curl https://fizzy-mcp-hosted.ryanyogan.workers.dev/health`
+3. If using a corporate network, check for firewall rules blocking the connection
+
+### Connection timeouts (Local Mode)
 
 1. Check your internet connection
 2. Verify Fizzy API is accessible: `curl https://app.fizzy.do/api/health`
 3. Try increasing the timeout in Claude Desktop settings
 
-### Server crashes
+### Server crashes (Local Mode)
 
 Check the server logs. You can run the server manually to see errors:
 
@@ -162,7 +309,8 @@ npx fizzy-do-mcp
 
 ## Best Practices
 
-1. **Use `npx`** for automatic updates to the latest version
-2. **Keep credentials in** `~/.config/fizzy-mcp/config.json` rather than the Claude config
-3. **Restart Claude Desktop** after any configuration changes
-4. **Check `fizzy-mcp status`** if you encounter authentication issues
+1. **Use remote mode** for automatic updates and zero maintenance
+2. **Keep tokens secure** - never commit them to version control
+3. **Use `X-Fizzy-Account-Slug`** if you have access to multiple accounts
+4. **Restart Claude Desktop** after any configuration changes
+5. **Check `fizzy-mcp status`** if you encounter authentication issues (local mode)

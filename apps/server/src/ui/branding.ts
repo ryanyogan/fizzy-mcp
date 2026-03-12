@@ -79,7 +79,7 @@ export function box(
     margin: { top: 0, bottom: 1, left: 0, right: 0 },
     borderStyle: 'round',
     borderColor: options?.borderColor ?? '#22d3ee',
-    title: options?.title,
+    ...(options?.title !== undefined && { title: options.title }),
     titleAlignment: 'left',
   });
 }

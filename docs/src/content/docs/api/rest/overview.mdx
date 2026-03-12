@@ -1,0 +1,272 @@
+---
+title: REST API Overview
+description: REST API endpoints for the Fizzy MCP hosted service
+---
+
+import { Aside, Card, CardGrid, Tabs, TabItem } from '@astrojs/starlight/components';
+
+# REST API Overview
+
+The Fizzy MCP hosted service provides a comprehensive REST API for interacting with the service programmatically. This API is separate from the MCP endpoint and is designed for administrative tasks, usage tracking, and service health monitoring.
+
+## Base URL
+
+All REST API endpoints are served from:
+
+```
+https://fizzy-mcp-hosted.ryanyogan.workers.dev
+```
+
+<Aside type="note">
+  This is the hosted service API. For direct Fizzy app integration, use the [TypeScript
+  Client](/api/client/) instead.
+</Aside>
+
+## Authentication Methods
+
+The REST API supports multiple authentication methods depending on the endpoint and use case.
+
+### Fizzy Token (Recommended)
+
+Use your Personal Access Token in the `X-Fizzy-Token` header:
+
+```bash
+curl -H "X-Fizzy-Token: fz_xxxxxxxxxxxxx" \
+  https://fizzy-mcp-hosted.ryanyogan.workers.dev/api/me/usage
+```
+
+This is the primary authentication method for user-specific endpoints like usage tracking.
+
+### API Key
+
+For service-to-service communication, use an API key:
+
+```bash
+curl -H "X-API-Key: your-api-key" \
+  https://fizzy-mcp-hosted.ryanyogan.workers.dev/api/admin/stats/overview
+```
+
+### Session-Based (Browser)
+
+When accessing the API through a web browser with an active session, cookies are used automatically.
+
+### No Authentication
+
+Some endpoints are publicly accessible without authentication:
+
+- `GET /` - Service root
+- `GET /api/health` - Health check
+- `GET /api/info` - Service information
+
+## Common Response Format
+
+All API responses follow a consistent JSON structure.
+
+### Success Response
+
+```json
+{
+  "data": {
+    // Response payload
+  },
+  "meta": {
+    "requestId": "550e8400-e29b-41d4-a716-446655440000",
+    "timestamp": "2024-01-15T10:30:00.000Z"
+  }
+}
+```
+
+### Error Response
+
+When an error occurs, the API returns a structured error response:
+
+```json
+{
+  "error": "RATE_LIMIT_ERROR",
+  "message": "Rate limit exceeded. Please try again in 60 seconds.",
+  "requestId": "550e8400-e29b-41d4-a716-446655440000"
+}
+```
+
+| Field       | Type   | Description                             |
+| ----------- | ------ | --------------------------------------- |
+| `error`     | string | Machine-readable error code             |
+| `message`   | string | Human-readable error description        |
+| `requestId` | string | Unique request identifier for debugging |
+
+### HTTP Status Codes
+
+| Status | Description                                       |
+| ------ | ------------------------------------------------- |
+| `200`  | Success                                           |
+| `201`  | Created (for POST requests that create resources) |
+| `400`  | Bad Request - Invalid parameters                  |
+| `401`  | Unauthorized - Missing or invalid authentication  |
+| `403`  | Forbidden - Insufficient permissions              |
+| `404`  | Not Found - Resource doesn't exist                |
+| `429`  | Too Many Requests - Rate limit exceeded           |
+| `500`  | Internal Server Error                             |
+
+## Error Codes
+
+| Code               | Description                            |
+| ------------------ | -------------------------------------- |
+| `AUTH_ERROR`       | Authentication failed or token invalid |
+| `FORBIDDEN_ERROR`  | Permission denied for this operation   |
+| `NOT_FOUND_ERROR`  | Requested resource not found           |
+| `VALIDATION_ERROR` | Invalid request parameters             |
+| `RATE_LIMIT_ERROR` | Rate limit exceeded                    |
+| `API_ERROR`        | Internal server error                  |
+
+## Rate Limiting
+
+API requests are rate-limited based on your service tier:
+
+| Tier       | Requests/Minute | Daily Limit |
+| ---------- | --------------- | ----------- |
+| Free       | 60              | 1,000       |
+| Pro        | 300             | 10,000      |
+| Enterprise | 1,000           | Unlimited   |
+
+Rate limit headers are included in all responses:
+
+```http
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 45
+X-RateLimit-Reset: 1705312260
+```
+
+<Aside type="tip">
+  When you receive a `429` response, check the `Retry-After` header for the number of seconds to
+  wait before retrying.
+</Aside>
+
+## API Endpoints by Category
+
+<CardGrid>
+  <Card title="Health & Info" icon="heart">
+    Service status and information endpoints that don't require authentication. [View Health
+    Endpoints](/api/rest/health/)
+  </Card>
+  <Card title="Usage" icon="graph">
+    Track your API usage, quotas, and history. [View Usage Endpoints](/api/rest/usage/)
+  </Card>
+  <Card title="Admin" icon="setting">
+    Administrative endpoints for service management. [View Admin Endpoints](/api/rest/admin/)
+  </Card>
+  <Card title="MCP Endpoint" icon="rocket">
+    The core MCP HTTP endpoint for AI agents. [View MCP Endpoint](/api/mcp-endpoint/)
+  </Card>
+</CardGrid>
+
+## All Endpoints
+
+### Public Endpoints (No Auth Required)
+
+| Method | Endpoint      | Description                      |
+| ------ | ------------- | -------------------------------- |
+| `GET`  | `/`           | Service root with links and info |
+| `GET`  | `/api/health` | Health check                     |
+| `GET`  | `/api/info`   | Service info with tier details   |
+| `GET`  | `/mcp/info`   | MCP server capabilities          |
+
+### User Endpoints (Fizzy Token Required)
+
+| Method | Endpoint              | Description                  |
+| ------ | --------------------- | ---------------------------- |
+| `GET`  | `/api/me/usage`       | Current usage statistics     |
+| `GET`  | `/api/me/usage/today` | Today's usage                |
+| `GET`  | `/api/me/history`     | Usage history                |
+| `POST` | `/mcp`                | MCP Streamable HTTP endpoint |
+
+### Admin Endpoints (Admin Auth Required)
+
+| Method  | Endpoint                    | Description         |
+| ------- | --------------------------- | ------------------- |
+| `GET`   | `/api/admin/settings`       | Get all settings    |
+| `PATCH` | `/api/admin/settings`       | Update settings     |
+| `POST`  | `/api/admin/settings/reset` | Reset to defaults   |
+| `GET`   | `/api/admin/stats/overview` | Global usage stats  |
+| `GET`   | `/api/admin/stats/tools`    | Per-tool statistics |
+
+## Request Headers
+
+Common headers used across the API:
+
+| Header                 | Required            | Description                               |
+| ---------------------- | ------------------- | ----------------------------------------- |
+| `Content-Type`         | For POST/PATCH      | Should be `application/json`              |
+| `Accept`               | Recommended         | `application/json` or `text/event-stream` |
+| `X-Fizzy-Token`        | For user endpoints  | Your Fizzy Personal Access Token          |
+| `X-Fizzy-Account-Slug` | Optional            | Target account slug (e.g., `/my-org`)     |
+| `X-API-Key`            | For admin endpoints | Service API key                           |
+
+## Example: Making Your First Request
+
+<Tabs>
+  <TabItem label="curl">
+```bash
+# Check service health (no auth required)
+curl https://fizzy-mcp-hosted.ryanyogan.workers.dev/api/health
+
+# Get your usage stats (requires token)
+
+curl -H "X-Fizzy-Token: fz_xxxxxxxxxxxxx" \
+ https://fizzy-mcp-hosted.ryanyogan.workers.dev/api/me/usage
+
+````
+  </TabItem>
+  <TabItem label="JavaScript">
+```javascript
+// Check service health
+const health = await fetch(
+  'https://fizzy-mcp-hosted.ryanyogan.workers.dev/api/health'
+).then(r => r.json());
+
+console.log(health.status); // "ok"
+
+// Get usage stats
+const usage = await fetch(
+  'https://fizzy-mcp-hosted.ryanyogan.workers.dev/api/me/usage',
+  {
+    headers: {
+      'X-Fizzy-Token': 'fz_xxxxxxxxxxxxx'
+    }
+  }
+).then(r => r.json());
+
+console.log(usage.data.totalReads);
+````
+
+  </TabItem>
+  <TabItem label="Python">
+```python
+import requests
+
+BASE_URL = "https://fizzy-mcp-hosted.ryanyogan.workers.dev"
+TOKEN = "fz_xxxxxxxxxxxxx"
+
+# Check service health
+
+health = requests.get(f"{BASE_URL}/api/health").json()
+print(health["status"]) # "ok"
+
+# Get usage stats
+
+usage = requests.get(
+f"{BASE_URL}/api/me/usage",
+headers={"X-Fizzy-Token": TOKEN}
+).json()
+
+print(usage["data"]["totalReads"])
+
+```
+  </TabItem>
+</Tabs>
+
+## Next Steps
+
+- [Health & Info Endpoints](/api/rest/health/) - Learn about service health monitoring
+- [Usage Endpoints](/api/rest/usage/) - Track your API usage
+- [MCP Endpoint](/api/mcp-endpoint/) - Connect AI agents via MCP
+```

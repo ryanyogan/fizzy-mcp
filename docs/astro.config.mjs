@@ -48,6 +48,14 @@ export default defineConfig({
           ],
         },
         {
+          label: 'Hosted Service',
+          items: [
+            { label: 'Overview', slug: 'hosted/overview' },
+            { label: 'Rate Limits', slug: 'hosted/rate-limits' },
+            { label: 'API Keys', slug: 'hosted/api-keys' },
+          ],
+        },
+        {
           label: 'Tools Reference',
           items: [
             { label: 'Overview', slug: 'tools/overview' },
@@ -115,9 +123,7 @@ export default defineConfig({
             },
             {
               label: 'Tags',
-              items: [
-                { label: 'fizzy_list_tags', slug: 'tools/tags/list-tags' },
-              ],
+              items: [{ label: 'fizzy_list_tags', slug: 'tools/tags/list-tags' }],
             },
             {
               label: 'Users',
@@ -140,6 +146,16 @@ export default defineConfig({
         {
           label: 'API Reference',
           items: [
+            { label: 'MCP Endpoint', slug: 'api/mcp-endpoint' },
+            {
+              label: 'REST API',
+              items: [
+                { label: 'Overview', slug: 'api/rest/overview' },
+                { label: 'Health & Info', slug: 'api/rest/health' },
+                { label: 'Usage', slug: 'api/rest/usage' },
+                { label: 'Admin', slug: 'api/rest/admin' },
+              ],
+            },
             { label: 'TypeScript Client', slug: 'api/client' },
             { label: 'Error Handling', slug: 'api/errors' },
             { label: 'Result Type', slug: 'api/result' },

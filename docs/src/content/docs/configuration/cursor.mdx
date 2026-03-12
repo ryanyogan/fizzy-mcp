@@ -3,59 +3,151 @@ title: Cursor
 description: Configure Fizzy MCP for Cursor editor
 ---
 
-import { Aside, Steps } from '@astrojs/starlight/components';
+import { Aside, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
 
 # Cursor Configuration
 
 This guide covers setting up Fizzy MCP with [Cursor](https://cursor.com), the AI-powered code editor.
 
+## Deployment Modes
+
+Fizzy MCP supports two deployment modes:
+
+| Mode                     | Description                                   | Best For                                        |
+| ------------------------ | --------------------------------------------- | ----------------------------------------------- |
+| **Remote** (Recommended) | Connects to hosted Fizzy MCP service via HTTP | Most users, zero maintenance, always up-to-date |
+| **Local**                | Runs MCP server locally via npx               | Offline use, custom modifications, self-hosting |
+
+<Aside type="tip">
+  **Remote mode is recommended** for most users. It requires no local installation, receives
+  automatic updates, and provides the best reliability.
+</Aside>
+
 ## Auto-Configuration
 
-The easiest way to configure Cursor is through the Fizzy MCP auth command:
+The easiest way to configure Cursor is through the Fizzy MCP CLI:
 
 ```bash
 npx fizzy-do-mcp auth
 ```
 
-When prompted, select Cursor for automatic configuration.
+Or use the configure command directly:
+
+```bash
+npx fizzy-do-mcp configure
+```
+
+When prompted, select Cursor for automatic configuration. The CLI will detect the best mode for your setup.
+
+## Configuration File Location
+
+Cursor stores its MCP configuration at:
+
+```
+~/.cursor/mcp.json
+```
 
 ## Manual Configuration
 
-<Steps>
+<Tabs>
+<TabItem label="Remote Mode (Recommended)">
 
-1. **Locate the configuration file**
+Remote mode connects to the hosted Fizzy MCP service via HTTP transport.
 
-   ```
-   ~/.cursor/mcp.json
-   ```
+### Basic Remote Configuration
 
-2. **Create or edit the file**
+```json
+{
+  "mcpServers": {
+    "fizzy": {
+      "transport": "http",
+      "url": "https://fizzy-mcp-hosted.ryanyogan.workers.dev/mcp",
+      "headers": {
+        "X-Fizzy-Token": "your-fizzy-token"
+      }
+    }
+  }
+}
+```
 
-   If the file doesn't exist, create it:
+### Remote Configuration with All Headers
 
-   ```json
-   {
-     "mcpServers": {
-       "fizzy": {
-         "command": "npx",
-         "args": ["-y", "fizzy-do-mcp@latest"]
-       }
-     }
-   }
-   ```
+```json
+{
+  "mcpServers": {
+    "fizzy": {
+      "transport": "http",
+      "url": "https://fizzy-mcp-hosted.ryanyogan.workers.dev/mcp",
+      "headers": {
+        "X-Fizzy-Token": "your-fizzy-token",
+        "X-Fizzy-Account-Slug": "/my-org",
+        "X-API-Key": "fmcp_your_api_key"
+      }
+    }
+  }
+}
+```
 
-3. **Restart Cursor**
+</TabItem>
+<TabItem label="Local Mode">
 
-   Close and reopen Cursor to load the new configuration.
+Local mode runs the MCP server on your machine via stdio.
 
-</Steps>
+### Basic Local Configuration
+
+```json
+{
+  "mcpServers": {
+    "fizzy": {
+      "command": "npx",
+      "args": ["-y", "fizzy-do-mcp@latest"]
+    }
+  }
+}
+```
+
+### Local Configuration with Environment Variables
+
+```json
+{
+  "mcpServers": {
+    "fizzy": {
+      "command": "npx",
+      "args": ["-y", "fizzy-do-mcp@latest"],
+      "env": {
+        "FIZZY_ACCESS_TOKEN": "your-fizzy-token",
+        "FIZZY_ACCOUNT_SLUG": "/my-org"
+      }
+    }
+  }
+}
+```
+
+</TabItem>
+</Tabs>
+
+After adding the configuration, restart Cursor to load the new settings.
+
+## Remote Mode Headers
+
+When using remote mode, the following headers are available:
+
+| Header                 | Required | Description                                              |
+| ---------------------- | -------- | -------------------------------------------------------- |
+| `X-Fizzy-Token`        | **Yes**  | Your Fizzy personal access token (from app.fizzy.do)     |
+| `X-Fizzy-Account-Slug` | No       | Account slug like `/my-org` to select a specific account |
+| `X-API-Key`            | No       | API key for higher rate limits (prefix: `fmcp_`)         |
+
+<Aside>
+  To get your Fizzy token, visit [app.fizzy.do](https://app.fizzy.do), go to Settings > Personal Access Tokens, and create a new token.
+</Aside>
 
 ## Verifying the Connection
 
 After restarting Cursor:
 
 1. Open the AI chat panel
-2. Check that MCP servers are connected
+2. Check that MCP servers are connected (look for the MCP indicator)
 3. Try asking: "What Fizzy boards do I have?"
 
 ## Using Fizzy with Cursor
@@ -78,7 +170,9 @@ Cursor can reference your code when creating tasks:
 
 ## Configuration Options
 
-### Global Installation
+### Global Installation (Local Mode Only)
+
+If you installed Fizzy MCP globally:
 
 ```json
 {
@@ -90,15 +184,61 @@ Cursor can reference your code when creating tasks:
 }
 ```
 
-### Authentication
+### Authentication for Local Mode
 
-After configuring Cursor, authenticate with Fizzy:
+After configuring Cursor with local mode, authenticate with Fizzy:
 
 ```bash
 npx fizzy-do-mcp auth
 ```
 
-This stores your credentials securely in `~/.config/fizzy-mcp/config.json` (mode 0600). No need to put tokens in your MCP config.
+This stores your credentials securely in `~/.config/fizzy-mcp/config.json` (mode 0600). No need to put tokens in your MCP config unless you prefer explicit configuration.
+
+### Multiple MCP Servers
+
+You can run Fizzy alongside other MCP servers:
+
+<Tabs>
+<TabItem label="Mixed Remote/Local">
+
+```json
+{
+  "mcpServers": {
+    "fizzy": {
+      "transport": "http",
+      "url": "https://fizzy-mcp-hosted.ryanyogan.workers.dev/mcp",
+      "headers": {
+        "X-Fizzy-Token": "your-fizzy-token"
+      }
+    },
+    "github": {
+      "command": "npx",
+      "args": ["@github/mcp-server"]
+    }
+  }
+}
+```
+
+</TabItem>
+<TabItem label="All Local">
+
+```json
+{
+  "mcpServers": {
+    "fizzy": {
+      "command": "npx",
+      "args": ["-y", "fizzy-do-mcp@latest"]
+    },
+    "github": {
+      "command": "npx",
+      "args": ["@github/mcp-server"]
+    }
+  }
+}
+```
+
+</TabItem>
+</Tabs>
 
 ## Troubleshooting
 
@@ -106,7 +246,23 @@ This stores your credentials securely in `~/.config/fizzy-mcp/config.json` (mode
 
 1. Verify `~/.cursor/mcp.json` exists and is valid JSON
 2. Restart Cursor completely
-3. Check Cursor's developer console for errors
+3. Check Cursor's developer console for errors (Help > Toggle Developer Tools)
+
+### "Not authenticated" errors (Remote Mode)
+
+Verify your `X-Fizzy-Token` header is correct:
+
+1. Check that the token is valid at [app.fizzy.do](https://app.fizzy.do)
+2. Ensure there are no extra spaces or quotes around the token
+3. Regenerate the token if needed
+
+### "Not authenticated" errors (Local Mode)
+
+Run `fizzy-mcp auth` to set up or refresh your credentials:
+
+```bash
+npx fizzy-do-mcp auth
+```
 
 ### Permission errors
 
@@ -116,10 +272,27 @@ Ensure the config file is readable:
 chmod 644 ~/.cursor/mcp.json
 ```
 
-### Server not starting
+### Server not starting (Local Mode)
 
 Test the server manually:
 
 ```bash
 npx fizzy-do-mcp status
 ```
+
+### Connection issues (Remote Mode)
+
+1. Check your internet connection
+2. Verify the hosted service is accessible:
+   ```bash
+   curl https://fizzy-mcp-hosted.ryanyogan.workers.dev/health
+   ```
+3. If using a corporate network, check for firewall rules
+
+## Best Practices
+
+1. **Use remote mode** for automatic updates and zero maintenance
+2. **Keep tokens secure** - never commit config files with tokens to version control
+3. **Use `X-Fizzy-Account-Slug`** if you have access to multiple Fizzy accounts
+4. **Restart Cursor** after any configuration changes
+5. **Leverage code context** - ask Cursor to create cards that reference your current code

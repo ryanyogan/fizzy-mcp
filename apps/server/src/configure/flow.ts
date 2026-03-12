@@ -8,19 +8,14 @@
 import * as readline from 'node:readline';
 import {
   type AgentInfo,
+  type ServerConfigOptions,
   getAvailableAgents,
   configureAgent,
   isAgentConfigured,
 } from './agents.js';
-import {
-  colors,
-  box,
-  success,
-  warning,
-  info,
-  listItem,
-} from '../ui/branding.js';
+import { colors, box, listItem } from '../ui/branding.js';
 import { showSuccess, showWarning, showInfo } from '../ui/spinner.js';
+import { readStoredConfig } from '../credentials.js';
 
 /**
  * Prompts the user for a yes/no answer.
@@ -97,6 +92,35 @@ async function promptAgentSelection(agents: AgentInfo[]): Promise<AgentInfo[]> {
 }
 
 /**
+ * Gets the server config options from stored configuration.
+ */
+function getServerConfigOptions(): ServerConfigOptions | null {
+  const stored = readStoredConfig();
+
+  if (!stored.accessToken) {
+    return null;
+  }
+
+  const options: ServerConfigOptions = {
+    mode: stored.mode || 'remote',
+    accessToken: stored.accessToken,
+  };
+
+  // Only include optional properties if they have values
+  if (stored.accountSlug) {
+    options.accountSlug = stored.accountSlug;
+  }
+  if (stored.hostedApiKey) {
+    options.hostedApiKey = stored.hostedApiKey;
+  }
+  if (stored.hostedUrl) {
+    options.hostedUrl = stored.hostedUrl;
+  }
+
+  return options;
+}
+
+/**
  * Runs the agent configuration flow.
  *
  * This is called after successful authentication to offer
@@ -105,6 +129,16 @@ async function promptAgentSelection(agents: AgentInfo[]): Promise<AgentInfo[]> {
  * @returns true if any agents were configured
  */
 export async function runConfigureFlow(): Promise<boolean> {
+  // Get stored config options
+  const configOptions = getServerConfigOptions();
+
+  if (!configOptions) {
+    console.error('');
+    showWarning('No credentials found');
+    console.error(colors.muted('Run "fizzy-mcp auth" first to set up authentication.'));
+    return false;
+  }
+
   // Detect available agents
   const availableAgents = getAvailableAgents();
 
@@ -118,12 +152,6 @@ export async function runConfigureFlow(): Promise<boolean> {
   // Check how many are already configured
   const unconfiguredAgents = availableAgents.filter((a) => !isAgentConfigured(a));
 
-  if (unconfiguredAgents.length === 0) {
-    console.error('');
-    showSuccess('All detected AI agents are already configured');
-    return false;
-  }
-
   // Show detected agents
   console.error('');
   const agentList = availableAgents
@@ -136,11 +164,20 @@ export async function runConfigureFlow(): Promise<boolean> {
 
   console.error(box(agentList, { title: 'Detected AI Agents' }));
 
+  // Show mode info
+  const modeInfo =
+    configOptions.mode === 'remote'
+      ? colors.muted('Mode: Remote (hosted service)')
+      : colors.muted('Mode: Local (stdio)');
+  console.error(modeInfo);
+
   // Ask if user wants to configure
-  const shouldConfigure = await promptYesNo(
-    'Would you like to configure Fizzy for these agents?',
-    true,
-  );
+  const configureAll = unconfiguredAgents.length === availableAgents.length;
+  const prompt = configureAll
+    ? 'Would you like to configure Fizzy for these agents?'
+    : 'Would you like to update the Fizzy configuration?';
+
+  const shouldConfigure = await promptYesNo(prompt, true);
 
   if (!shouldConfigure) {
     console.error('');
@@ -149,12 +186,12 @@ export async function runConfigureFlow(): Promise<boolean> {
     return false;
   }
 
-  // If there's only one unconfigured agent, configure it directly
+  // If there's only one agent, configure it directly
   let agentsToConfigure: AgentInfo[];
-  if (unconfiguredAgents.length === 1) {
-    agentsToConfigure = unconfiguredAgents;
+  if (availableAgents.length === 1) {
+    agentsToConfigure = availableAgents;
   } else {
-    agentsToConfigure = await promptAgentSelection(unconfiguredAgents);
+    agentsToConfigure = await promptAgentSelection(availableAgents);
   }
 
   if (agentsToConfigure.length === 0) {
@@ -168,14 +205,10 @@ export async function runConfigureFlow(): Promise<boolean> {
 
   for (const agent of agentsToConfigure) {
     try {
-      const wasConfigured = configureAgent(agent);
-      if (wasConfigured) {
-        showSuccess(`Configured ${agent.name}`);
-        console.error(colors.muted(`  → ${agent.configPath}`));
-        configuredCount++;
-      } else {
-        showWarning(`${agent.name} is already configured`);
-      }
+      configureAgent(agent, configOptions);
+      showSuccess(`Configured ${agent.name}`);
+      console.error(colors.muted(`  → ${agent.configPath}`));
+      configuredCount++;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       showWarning(`Failed to configure ${agent.name}: ${message}`);
@@ -184,16 +217,20 @@ export async function runConfigureFlow(): Promise<boolean> {
 
   if (configuredCount > 0) {
     console.error('');
-    console.error(
-      box(
-        [
-          colors.success(`Successfully configured ${configuredCount} agent(s)!`),
-          '',
-          colors.muted('Restart your AI agents to start using Fizzy.'),
-        ].join('\n'),
-        { borderColor: '#4ade80' },
-      ),
-    );
+    const successMessage = [
+      colors.success(`Successfully configured ${configuredCount} agent(s)!`),
+      '',
+      colors.muted('Restart your AI agents to start using Fizzy.'),
+    ];
+
+    if (configOptions.mode === 'remote') {
+      successMessage.push('');
+      successMessage.push(
+        colors.warning('Note: Your Fizzy token is stored in the agent config files.'),
+      );
+    }
+
+    console.error(box(successMessage.join('\n'), { borderColor: '#4ade80' }));
   }
 
   return configuredCount > 0;

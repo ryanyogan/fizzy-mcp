@@ -3,73 +3,211 @@ title: Environment Variables
 description: Configure Fizzy MCP using environment variables
 ---
 
-import { Aside } from '@astrojs/starlight/components';
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
 # Environment Variables
 
-Fizzy MCP can be configured using environment variables, which take precedence over the config file.
+Fizzy MCP can be configured using environment variables, which take precedence over the config file. Environment variables are particularly useful for CI/CD pipelines, Docker containers, and managing multiple configurations.
 
 ## Available Variables
 
-| Variable | Required | Description | Default |
-|----------|----------|-------------|---------|
-| `FIZZY_ACCESS_TOKEN` | Yes* | Personal Access Token | From config file |
-| `FIZZY_ACCOUNT_SLUG` | No | Account slug (e.g., `/my-org`) | Auto-detect |
-| `FIZZY_BASE_URL` | No | API base URL | `https://app.fizzy.do` |
+### Core Variables
 
-<Aside>
-  *Required if not configured via `fizzy-mcp auth`
-</Aside>
+| Variable             | Required | Description                    | Default                |
+| -------------------- | -------- | ------------------------------ | ---------------------- |
+| `FIZZY_ACCESS_TOKEN` | Yes\*    | Personal Access Token          | From config file       |
+| `FIZZY_ACCOUNT_SLUG` | No       | Account slug (e.g., `/my-org`) | Auto-detect            |
+| `FIZZY_BASE_URL`     | No       | API base URL                   | `https://app.fizzy.do` |
 
-## Usage
+### Remote Mode Variables
+
+| Variable            | Required | Description                                  | Default                                              |
+| ------------------- | -------- | -------------------------------------------- | ---------------------------------------------------- |
+| `FIZZY_MCP_MODE`    | No       | Deployment mode: `remote` or `local`         | `local`                                              |
+| `FIZZY_MCP_URL`     | No       | Custom hosted MCP URL (for self-hosting)     | `https://fizzy-mcp-hosted.ryanyogan.workers.dev/mcp` |
+| `FIZZY_MCP_API_KEY` | No       | API key for hosted service (prefix: `fmcp_`) | None                                                 |
+
+<Aside>*`FIZZY_ACCESS_TOKEN` is required if not configured via `fizzy-mcp auth`</Aside>
+
+## Variable Details
+
+### FIZZY_MCP_MODE
+
+Controls whether the MCP server runs locally or connects to the hosted service.
+
+| Value    | Description                                       |
+| -------- | ------------------------------------------------- |
+| `remote` | Connect to hosted Fizzy MCP service (recommended) |
+| `local`  | Run MCP server locally (default)                  |
+
+```bash
+# Use hosted service
+export FIZZY_MCP_MODE=remote
+
+# Use local server (default)
+export FIZZY_MCP_MODE=local
+```
+
+### FIZZY_MCP_API_KEY
+
+API key for the hosted service. Provides higher rate limits for power users.
+
+- Prefix: `fmcp_`
+- Example: `fmcp_abc123xyz789...`
+
+```bash
+export FIZZY_MCP_API_KEY=fmcp_your_api_key_here
+```
+
+<Aside type="tip">Contact Fizzy support to obtain an API key for higher rate limits.</Aside>
+
+### FIZZY_MCP_URL
+
+Custom URL for the hosted MCP service. Only needed if you're self-hosting Fizzy MCP or using a custom deployment.
+
+```bash
+# Default hosted service
+export FIZZY_MCP_URL=https://fizzy-mcp-hosted.ryanyogan.workers.dev/mcp
+
+# Self-hosted instance
+export FIZZY_MCP_URL=https://fizzy-mcp.mycompany.com/mcp
+```
+
+### FIZZY_ACCESS_TOKEN
+
+Your Fizzy personal access token. Get this from [app.fizzy.do](https://app.fizzy.do) under Settings > Personal Access Tokens.
+
+```bash
+export FIZZY_ACCESS_TOKEN=fz_xxxxxxxxxxxxx
+```
+
+### FIZZY_ACCOUNT_SLUG
+
+Specify which Fizzy account to use if you have access to multiple accounts.
+
+```bash
+export FIZZY_ACCOUNT_SLUG=/my-org
+```
+
+### FIZZY_BASE_URL
+
+Custom Fizzy API base URL. Only needed for enterprise deployments with a custom Fizzy instance.
+
+```bash
+export FIZZY_BASE_URL=https://fizzy.mycompany.com
+```
+
+## Usage Examples
 
 ### Shell Export
 
 ```bash
+# Remote mode configuration
+export FIZZY_MCP_MODE=remote
+export FIZZY_ACCESS_TOKEN=fz_xxxxxxxxxxxxx
+export FIZZY_ACCOUNT_SLUG=/my-org
+export FIZZY_MCP_API_KEY=fmcp_your_api_key
+
+# Local mode configuration
+export FIZZY_MCP_MODE=local
 export FIZZY_ACCESS_TOKEN=fz_xxxxxxxxxxxxx
 export FIZZY_ACCOUNT_SLUG=/my-org
 ```
 
-### In AI Agent Config
+### In AI Agent Config (Local Mode)
 
-Most MCP clients support an `env` field:
+Most MCP clients support an `env` field for local mode servers:
 
-```json
-{
-  "mcpServers": {
-    "fizzy": {
-      "command": "npx",
-      "args": ["@fizzy-mcp/server"],
-      "env": {
-        "FIZZY_ACCESS_TOKEN": "fz_xxxxxxxxxxxxx",
-        "FIZZY_ACCOUNT_SLUG": "/my-org"
+<Tabs>
+  <TabItem label="Claude Desktop / Cursor">
+    ```json
+    {
+      "mcpServers": {
+        "fizzy": {
+          "command": "npx",
+          "args": ["-y", "fizzy-do-mcp@latest"],
+          "env": {
+            "FIZZY_ACCESS_TOKEN": "fz_xxxxxxxxxxxxx",
+            "FIZZY_ACCOUNT_SLUG": "/my-org",
+            "FIZZY_MCP_MODE": "local"
+          }
+        }
       }
     }
-  }
-}
-```
+    ```
+  </TabItem>
+  <TabItem label="OpenCode">
+    ```json
+    {
+      "mcp": {
+        "fizzy": {
+          "type": "local",
+          "command": ["npx", "-y", "fizzy-do-mcp@latest"],
+          "env": {
+            "FIZZY_ACCESS_TOKEN": "fz_xxxxxxxxxxxxx",
+            "FIZZY_ACCOUNT_SLUG": "/my-org"
+          }
+        }
+      }
+    }
+    ```
+  </TabItem>
+</Tabs>
+
+<Aside type="note">
+  For remote mode, credentials are passed via HTTP headers in the agent configuration, not
+  environment variables.
+</Aside>
 
 ### dotenv Files
 
-For development, you can use a `.env` file in your project:
+For local development, you can use a `.env` file in your project:
 
 ```bash
 # .env
+
+# Mode selection
+FIZZY_MCP_MODE=remote
+
+# Authentication
 FIZZY_ACCESS_TOKEN=fz_xxxxxxxxxxxxx
 FIZZY_ACCOUNT_SLUG=/my-org
+
+# Remote mode settings
+FIZZY_MCP_API_KEY=fmcp_your_api_key
+FIZZY_MCP_URL=https://fizzy-mcp-hosted.ryanyogan.workers.dev/mcp
+
+# Custom Fizzy instance (enterprise)
+# FIZZY_BASE_URL=https://fizzy.mycompany.com
 ```
 
 <Aside type="caution">
-  Never commit `.env` files with tokens to version control!
+  Never commit `.env` files with tokens to version control! Add `.env` to your `.gitignore`.
 </Aside>
 
 ## Precedence Order
 
 Configuration is resolved in this order (highest priority first):
 
-1. Environment variables
-2. Config file (`~/.config/fizzy-mcp/config.json`)
-3. Default values
+1. **Environment variables** (highest priority)
+2. **HTTP headers** (for remote mode agent configs)
+3. **Config file** (`~/.config/fizzy-mcp/config.json`)
+4. **Default values** (lowest priority)
+
+### Example Precedence
+
+If you have:
+
+- `FIZZY_ACCOUNT_SLUG=/env-org` in environment
+- `account_slug: "/config-org"` in config file
+- `X-Fizzy-Account-Slug: /header-org` in agent headers
+
+The environment variable wins: `/env-org` will be used.
+
+<Aside type="tip">
+  For remote mode, HTTP headers in your agent configuration take precedence over environment
+  variables for authentication.
+</Aside>
 
 ## CI/CD Usage
 
@@ -77,39 +215,109 @@ For automated deployments, set environment variables in your CI system:
 
 ### GitHub Actions
 
+<Tabs>
+  <TabItem label="Remote Mode">
+    ```yaml
+    - name: Run with Fizzy (Remote)
+      env:
+        FIZZY_MCP_MODE: remote
+        FIZZY_ACCESS_TOKEN: ${{ secrets.FIZZY_TOKEN }}
+        FIZZY_ACCOUNT_SLUG: /my-org
+        FIZZY_MCP_API_KEY: ${{ secrets.FIZZY_MCP_API_KEY }}
+      run: |
+        npx fizzy-do-mcp status
+    ```
+  </TabItem>
+  <TabItem label="Local Mode">
+    ```yaml
+    - name: Run with Fizzy (Local)
+      env:
+        FIZZY_MCP_MODE: local
+        FIZZY_ACCESS_TOKEN: ${{ secrets.FIZZY_TOKEN }}
+        FIZZY_ACCOUNT_SLUG: /my-org
+      run: |
+        npx fizzy-do-mcp status
+    ```
+  </TabItem>
+</Tabs>
+
+### GitLab CI
+
 ```yaml
-- name: Run with Fizzy
-  env:
-    FIZZY_ACCESS_TOKEN: ${{ secrets.FIZZY_TOKEN }}
-    FIZZY_ACCOUNT_SLUG: /my-org
-  run: |
-    npx @fizzy-mcp/server status
+variables:
+  FIZZY_MCP_MODE: remote
+  FIZZY_ACCOUNT_SLUG: /my-org
+
+script:
+  - npx fizzy-do-mcp status
 ```
+
+Use GitLab CI/CD variables for secrets:
+
+- `FIZZY_ACCESS_TOKEN`
+- `FIZZY_MCP_API_KEY`
 
 ### Docker
 
-```dockerfile
-ENV FIZZY_ACCESS_TOKEN=fz_xxxxxxxxxxxxx
-ENV FIZZY_ACCOUNT_SLUG=/my-org
-```
+<Tabs>
+  <TabItem label="Dockerfile">
+    ```dockerfile # Not recommended for secrets, but shown for completeness ENV
+    FIZZY_MCP_MODE=remote ENV FIZZY_ACCOUNT_SLUG=/my-org # Pass secrets at runtime instead ```
+  </TabItem>
+  <TabItem label="Runtime">
+    ```bash # Recommended: pass secrets at runtime docker run \ -e FIZZY_MCP_MODE=remote \ -e
+    FIZZY_ACCESS_TOKEN=fz_xxx \ -e FIZZY_MCP_API_KEY=fmcp_xxx \ -e FIZZY_ACCOUNT_SLUG=/my-org \
+    my-app ```
+  </TabItem>
+  <TabItem label="Docker Compose">
+    ```yaml services: app: image: my-app environment: FIZZY_MCP_MODE: remote FIZZY_ACCOUNT_SLUG:
+    /my-org FIZZY_ACCESS_TOKEN: ${FIZZY_ACCESS_TOKEN}
+    FIZZY_MCP_API_KEY: ${FIZZY_MCP_API_KEY}
+    ```
+  </TabItem>
+</Tabs>
 
-Or at runtime:
+## Self-Hosting Configuration
+
+For organizations running their own Fizzy MCP hosted service:
 
 ```bash
-docker run -e FIZZY_ACCESS_TOKEN=fz_xxx my-app
-```
+# Point to your self-hosted instance
+export FIZZY_MCP_URL=https://fizzy-mcp.internal.mycompany.com/mcp
+export FIZZY_MCP_MODE=remote
+export FIZZY_ACCESS_TOKEN=fz_xxxxxxxxxxxxx
 
-## Custom Base URL
-
-For enterprise deployments with a custom Fizzy instance:
-
-```bash
-export FIZZY_BASE_URL=https://fizzy.mycompany.com
+# If also running a custom Fizzy instance
+export FIZZY_BASE_URL=https://fizzy.internal.mycompany.com
 ```
 
 ## Security Considerations
 
-- Never log or print access tokens
-- Use secrets management in CI/CD
-- Rotate tokens regularly
-- Prefer config file auth for local development
+- **Never log or print access tokens** - they provide full access to your Fizzy account
+- **Use secrets management in CI/CD** - never hardcode tokens in pipeline files
+- **Rotate tokens regularly** - especially for production/CI environments
+- **Prefer config file auth for local development** - it's more secure than environment variables
+- **Keep API keys confidential** - they may provide higher rate limits
+- **Use separate tokens for CI/CD** - easier to revoke if compromised
+
+### Recommended Security Practices
+
+1. **For local development**: Use `fizzy-mcp auth` to store credentials securely
+2. **For CI/CD**: Use your platform's secrets management (GitHub Secrets, GitLab CI Variables, etc.)
+3. **For Docker**: Pass secrets at runtime, never bake them into images
+4. **For teams**: Consider using API keys with rate limiting for shared environments
+
+## Debugging Environment Variables
+
+To see which configuration values are being used:
+
+```bash
+npx fizzy-do-mcp status
+```
+
+This will show:
+
+- Current mode (remote/local)
+- Authentication status
+- Active account
+- API endpoint being used

@@ -1,0 +1,404 @@
+---
+title: API Keys
+description: Getting and using API keys for higher rate limits
+---
+
+import { Aside, Card, CardGrid, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+
+# API Keys
+
+API keys unlock **10x higher rate limits** on the Fizzy MCP hosted service. This page explains what API keys are, how to get one, and how to configure them in your workflow.
+
+## What Are API Keys?
+
+API keys are special tokens that identify your application or integration with the Fizzy MCP hosted service. They're separate from your Fizzy Personal Access Token and serve a different purpose:
+
+| Token Type    | Prefix  | Purpose                      | Rate Limit Effect              |
+| ------------- | ------- | ---------------------------- | ------------------------------ |
+| **Fizzy PAT** | `fz_`   | Authenticates with Fizzy API | Identifies your account        |
+| **API Key**   | `fmcp_` | Identifies your integration  | Upgrades to Authenticated tier |
+
+<Aside type="note">
+  You need **both** tokens to use the hosted service with higher rate limits: - `X-Fizzy-Token`
+  header with your Fizzy PAT (`fz_...`) - `X-API-Key` header with your API key (`fmcp_...`)
+</Aside>
+
+## Benefits of API Keys
+
+<CardGrid>
+  <Card title="10x Rate Limits" icon="rocket">
+    Upgrade from 100 to **1,000 writes/day** and from 1,000 to **10,000 reads/day**.
+  </Card>
+  <Card title="Usage Analytics" icon="document">
+    Track your integration's usage patterns and optimize your workflows.
+  </Card>
+  <Card title="Priority Support" icon="star">
+    API key holders get priority support for integration issues.
+  </Card>
+  <Card title="Future Features" icon="approve-check">
+    Early access to new hosted service features and capabilities.
+  </Card>
+</CardGrid>
+
+### Rate Limit Comparison
+
+| Tier              | Writes/Day | Reads/Day  | Requirements        |
+| ----------------- | ---------- | ---------- | ------------------- |
+| Anonymous         | 100        | 1,000      | Fizzy PAT only      |
+| **Authenticated** | **1,000**  | **10,000** | Fizzy PAT + API Key |
+
+## API Key Format
+
+API keys follow a specific format for easy identification:
+
+```
+fmcp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+- **Prefix**: Always starts with `fmcp_` (Fizzy MCP)
+- **Body**: 32+ character alphanumeric string
+- **Total length**: ~37 characters
+
+<Aside type="caution">
+  Never share your API key publicly or commit it to version control. Treat it like a password.
+</Aside>
+
+## How to Get an API Key
+
+<Steps>
+
+1. **Request Access**
+
+   API keys are currently available by request. Contact us through one of these channels:
+   - **Email**: support@fizzy.do
+   - **In-app**: Go to [app.fizzy.do](https://app.fizzy.do) → Help → Contact Support
+   - **GitHub**: Open an issue at [github.com/fizzy-do/fizzy-mcp](https://github.com/fizzy-do/fizzy-mcp/issues)
+
+2. **Describe Your Use Case**
+
+   Include information about:
+   - How you're using Fizzy MCP (AI agent, automation, etc.)
+   - Expected daily usage volume
+   - Your Fizzy account email
+
+3. **Receive Your API Key**
+
+   Once approved, you'll receive your API key via secure channel. The key is active immediately upon receipt.
+
+4. **Configure Your Integration**
+
+   Add the `X-API-Key` header to your MCP client configuration (see below).
+
+</Steps>
+
+<Aside type="tip" title="Coming Soon">
+  Self-service API key generation is planned for a future release. You'll be able to create and
+  manage API keys directly from your Fizzy account settings.
+</Aside>
+
+## Using Your API Key
+
+### HTTP Header
+
+Add the `X-API-Key` header alongside your Fizzy token:
+
+```bash
+curl -X POST https://fizzy-mcp-hosted.ryanyogan.workers.dev/mcp \
+  -H "Content-Type: application/json" \
+  -H "X-Fizzy-Token: fz_your_fizzy_token" \
+  -H "X-API-Key: fmcp_your_api_key" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/list",
+    "params": {}
+  }'
+```
+
+### AI Agent Configuration
+
+<Tabs>
+  <TabItem label="Claude Desktop">
+    Add both headers to your Claude Desktop config:
+
+    **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+    **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+    **Linux**: `~/.config/Claude/claude_desktop_config.json`
+
+    ```json
+    {
+      "mcpServers": {
+        "fizzy": {
+          "transport": "http",
+          "url": "https://fizzy-mcp-hosted.ryanyogan.workers.dev/mcp",
+          "headers": {
+            "X-Fizzy-Token": "fz_your_fizzy_token",
+            "X-API-Key": "fmcp_your_api_key"
+          }
+        }
+      }
+    }
+    ```
+
+  </TabItem>
+  <TabItem label="Cursor">
+    Add to your Cursor MCP configuration:
+
+    **Project**: `.cursor/mcp.json`
+    **Global**: `~/.cursor/mcp.json`
+
+    ```json
+    {
+      "mcpServers": {
+        "fizzy": {
+          "transport": "http",
+          "url": "https://fizzy-mcp-hosted.ryanyogan.workers.dev/mcp",
+          "headers": {
+            "X-Fizzy-Token": "fz_your_fizzy_token",
+            "X-API-Key": "fmcp_your_api_key"
+          }
+        }
+      }
+    }
+    ```
+
+  </TabItem>
+  <TabItem label="OpenCode">
+    Add to your OpenCode configuration:
+
+    **Location**: `~/.config/opencode/config.json`
+
+    ```json
+    {
+      "mcp": {
+        "servers": {
+          "fizzy": {
+            "type": "http",
+            "url": "https://fizzy-mcp-hosted.ryanyogan.workers.dev/mcp",
+            "headers": {
+              "X-Fizzy-Token": "fz_your_fizzy_token",
+              "X-API-Key": "fmcp_your_api_key"
+            }
+          }
+        }
+      }
+    }
+    ```
+
+  </TabItem>
+</Tabs>
+
+### CLI Configuration
+
+The Fizzy MCP CLI supports API key configuration:
+
+```bash
+npx @fizzy-mcp/server auth --api-key fmcp_your_api_key
+```
+
+This stores the API key in your local config file alongside your Fizzy token:
+
+```json
+{
+  "accessToken": "fz_your_fizzy_token",
+  "accountSlug": "/your-org",
+  "apiKey": "fmcp_your_api_key"
+}
+```
+
+When you run `fizzy-mcp configure`, the CLI will include the API key in the generated agent configurations.
+
+### Environment Variable
+
+For CI/CD, Docker, or server deployments, use an environment variable:
+
+```bash
+export FIZZY_MCP_API_KEY=fmcp_your_api_key
+```
+
+The hosted service checks for this variable in the `X-API-Key` header. Your deployment script or container should inject it:
+
+<Tabs>
+  <TabItem label="GitHub Actions">
+    ```yaml
+    jobs:
+      sync:
+        runs-on: ubuntu-latest
+        steps:
+          - name: Call Fizzy MCP
+            env:
+              FIZZY_ACCESS_TOKEN: ${{ secrets.FIZZY_TOKEN }}
+              FIZZY_MCP_API_KEY: ${{ secrets.FIZZY_MCP_API_KEY }}
+            run: |
+              curl -X POST https://fizzy-mcp-hosted.ryanyogan.workers.dev/mcp \
+                -H "Content-Type: application/json" \
+                -H "X-Fizzy-Token: $FIZZY_ACCESS_TOKEN" \
+                -H "X-API-Key: $FIZZY_MCP_API_KEY" \
+                -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
+    ```
+  </TabItem>
+  <TabItem label="Docker">
+    ```dockerfile
+    FROM node:20-alpine
+    
+    # Don't put secrets in Dockerfile - pass at runtime
+    ENV FIZZY_MCP_API_KEY=""
+    
+    CMD ["node", "your-app.js"]
+    ```
+
+    Run with secrets:
+
+    ```bash
+    docker run \
+      -e FIZZY_ACCESS_TOKEN=fz_xxx \
+      -e FIZZY_MCP_API_KEY=fmcp_xxx \
+      your-image
+    ```
+
+  </TabItem>
+  <TabItem label="dotenv">
+    ```bash
+    # .env (never commit this file!)
+    FIZZY_ACCESS_TOKEN=fz_your_fizzy_token
+    FIZZY_MCP_API_KEY=fmcp_your_api_key
+    ```
+
+    Load in your application:
+
+    ```typescript
+    import 'dotenv/config';
+
+    const headers = {
+      'X-Fizzy-Token': process.env.FIZZY_ACCESS_TOKEN,
+      'X-API-Key': process.env.FIZZY_MCP_API_KEY,
+    };
+    ```
+
+  </TabItem>
+</Tabs>
+
+## Verifying Your API Key
+
+After configuration, verify your API key is working:
+
+```bash
+curl -I -X POST https://fizzy-mcp-hosted.ryanyogan.workers.dev/mcp \
+  -H "Content-Type: application/json" \
+  -H "X-Fizzy-Token: fz_your_fizzy_token" \
+  -H "X-API-Key: fmcp_your_api_key" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
+```
+
+Check the response headers:
+
+```http
+X-User-Tier: authenticated
+X-RateLimit-Limit: 1000
+```
+
+If you see `X-User-Tier: authenticated` and `X-RateLimit-Limit: 1000`, your API key is active.
+
+## Security Best Practices
+
+### Do
+
+<CardGrid>
+  <Card title="Use Environment Variables" icon="setting">
+    Store API keys in environment variables or secrets managers, never in code.
+  </Card>
+  <Card title="Rotate Periodically" icon="refresh">
+    Request a new API key every 90 days and revoke old ones.
+  </Card>
+  <Card title="Use Separate Keys" icon="list-format">
+    Use different API keys for development, staging, and production.
+  </Card>
+  <Card title="Monitor Usage" icon="document">
+    Check rate limit headers regularly to detect unusual patterns.
+  </Card>
+</CardGrid>
+
+### Don't
+
+<Aside type="danger">
+  **Never do these things with your API key:** - Commit to Git or other version control - Share in
+  Slack, Discord, or other chat - Include in client-side JavaScript - Log in application output -
+  Share across team members (get individual keys)
+</Aside>
+
+### If Your Key Is Compromised
+
+<Steps>
+
+1. **Immediately contact support** to revoke the compromised key
+
+2. **Request a new API key** through normal channels
+
+3. **Update all configurations** with the new key
+
+4. **Review access logs** for suspicious activity
+
+5. **Rotate your Fizzy PAT** as well if it may have been exposed
+
+</Steps>
+
+## Frequently Asked Questions
+
+### Can I have multiple API keys?
+
+Currently, each user/organization receives one API key. If you need separate keys for different environments (dev/staging/prod), contact support.
+
+### What happens if my API key expires?
+
+API keys don't expire by default. However, they can be revoked manually. If your key stops working, contact support.
+
+### Can I use an API key without a Fizzy token?
+
+No. The API key upgrades your rate limits, but you still need a valid Fizzy Personal Access Token (`X-Fizzy-Token`) to authenticate with the Fizzy API.
+
+### Do API keys work with local mode?
+
+API keys are only for the hosted service. Local mode (`npx @fizzy-mcp/server`) has no rate limits and doesn't need API keys.
+
+### How do I check my remaining rate limit?
+
+Check the `X-RateLimit-Remaining` header in any response:
+
+```bash
+curl -I -X POST https://fizzy-mcp-hosted.ryanyogan.workers.dev/mcp \
+  -H "Content-Type: application/json" \
+  -H "X-Fizzy-Token: fz_xxx" \
+  -H "X-API-Key: fmcp_xxx" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
+```
+
+### Can I upgrade from Anonymous to Authenticated mid-day?
+
+Yes! As soon as you add a valid `X-API-Key` header, your requests will use Authenticated tier limits. The new higher limits apply immediately.
+
+## Troubleshooting
+
+### "Invalid API key"
+
+- Verify the key starts with `fmcp_`
+- Check for extra whitespace when copying
+- Ensure the key hasn't been revoked
+- Contact support if the issue persists
+
+### Still seeing Anonymous tier limits
+
+- Verify the `X-API-Key` header is being sent
+- Check header casing (`X-API-Key` not `x-api-key`, though HTTP headers are case-insensitive)
+- Ensure the key is valid and not expired
+
+### "API key not found"
+
+- The key may have been revoked
+- There may be a typo in the key
+- Contact support to verify key status
+
+## Next Steps
+
+- [Rate Limits](/hosted/rate-limits/) - Understand how limits work
+- [Hosted Service Overview](/hosted/overview/) - Learn about the hosted architecture
+- [Tools Reference](/tools/overview/) - Explore all available MCP tools

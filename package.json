@@ -16,7 +16,14 @@
     "format:check": "prettier --check .",
     "docs:dev": "pnpm --filter docs dev",
     "docs:build": "pnpm --filter docs build",
-    "docs:deploy": "pnpm --filter docs deploy"
+    "docs:deploy": "pnpm --filter docs deploy",
+    "hosted:dev": "pnpm --filter @fizzy-mcp/hosted dev",
+    "hosted:build": "pnpm --filter @fizzy-mcp/hosted build",
+    "hosted:deploy": "pnpm --filter @fizzy-mcp/hosted deploy",
+    "hosted:typecheck": "pnpm --filter @fizzy-mcp/hosted typecheck",
+    "hosted:db:generate": "pnpm --filter @fizzy-mcp/hosted db:generate",
+    "hosted:db:migrate": "pnpm --filter @fizzy-mcp/hosted db:migrate",
+    "hosted:db:migrate:local": "pnpm --filter @fizzy-mcp/hosted db:migrate:local"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

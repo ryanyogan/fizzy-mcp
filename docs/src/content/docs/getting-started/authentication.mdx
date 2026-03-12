@@ -3,67 +3,146 @@ title: Authentication
 description: How to authenticate Fizzy MCP with your Fizzy account
 ---
 
-import { Aside, Steps } from '@astrojs/starlight/components';
+import { Aside, Steps, Tabs, TabItem, Card, CardGrid } from '@astrojs/starlight/components';
 
 # Authentication
 
-Fizzy MCP uses Personal Access Tokens (PATs) to authenticate with the Fizzy API.
+Fizzy MCP uses Personal Access Tokens (PATs) to authenticate with the Fizzy API. The CLI provides a streamlined authentication flow that automatically configures your AI agents.
+
+## Deployment Modes
+
+Fizzy MCP supports two deployment modes:
+
+<CardGrid>
+  <Card title="Remote Mode (Recommended)" icon="rocket">
+    Uses our hosted service for zero-maintenance operation. No local server process required.
+    **Endpoint:** `https://fizzy-mcp-hosted.ryanyogan.workers.dev/mcp`
+  </Card>
+  <Card title="Local Mode" icon="laptop">
+    Traditional stdio MCP server running locally via `npx`. Full control over the server process.
+  </Card>
+</CardGrid>
+
+<Aside type="tip">
+  **Remote mode is recommended** for most users. It eliminates the need to manage a local server
+  process and provides automatic updates. Local mode is available for users who prefer full control
+  or have specific network requirements.
+</Aside>
 
 ## Getting a Personal Access Token
 
 <Steps>
 
 1. **Open Fizzy**
-   
+
    Go to [app.fizzy.do](https://app.fizzy.do) and sign in to your account.
 
 2. **Navigate to API Settings**
-   
+
    Click your avatar in the top-right corner, then go to **Profile** → **API**.
 
+   Or navigate directly to: [https://app.fizzy.do/my/profile/api](https://app.fizzy.do/my/profile/api)
+
 3. **Create a New Token**
-   
+
    Click **Create Token** and give it a descriptive name (e.g., "Claude Desktop MCP").
 
 4. **Copy the Token**
-   
+
    Copy the generated token. It starts with `fz_` and won't be shown again.
 
 </Steps>
 
 <Aside type="caution">
-  Store your token securely! It provides full access to your Fizzy account and cannot be retrieved after creation.
+  Store your token securely! It provides full access to your Fizzy account and cannot be retrieved
+  after creation.
 </Aside>
 
 ## Running Authentication
 
-Once you have your token, run the auth command:
+Run the auth command to configure Fizzy MCP:
 
 ```bash
 npx @fizzy-mcp/server auth
 ```
 
-You'll see:
+### CLI Options
+
+The `auth` command supports the following options:
+
+| Option                | Description                                       |
+| --------------------- | ------------------------------------------------- |
+| `-m, --mode <mode>`   | Deployment mode: `remote` (default) or `local`    |
+| `-k, --api-key <key>` | API key for higher rate limits (remote mode only) |
+| `--no-configure`      | Skip auto-configuration of AI agents              |
+
+**Examples:**
+
+```bash
+# Interactive auth (recommended)
+npx @fizzy-mcp/server auth
+
+# Explicitly use remote mode
+npx @fizzy-mcp/server auth --mode remote
+
+# Use local mode
+npx @fizzy-mcp/server auth --mode local
+
+# Remote mode with API key for higher rate limits
+npx @fizzy-mcp/server auth --mode remote --api-key fmcp_xxxxxxxxxxxxx
+
+# Auth without configuring AI agents
+npx @fizzy-mcp/server auth --no-configure
+```
+
+### Interactive Auth Flow
+
+Here's what the full interactive authentication flow looks like:
 
 ```
-  _____ _               
- |  ___(_)_________   _ 
+  _____ _
+ |  ___(_)_________   _
  | |_  | |_  /_  / | | |
  |  _| | |/ / / /| |_| |
  |_|   |_/___/___|\__, |
-                  |___/ 
+                  |___/
 AI-powered task management for the modern team
-v0.1.0
+v0.2.0
+
+┌─ Deployment Mode ─────────────────────────────────────┐
+│                                                       │
+│ Choose how Fizzy MCP connects to your AI agents:     │
+│                                                       │
+│ • Remote (recommended) - Uses hosted service          │
+│   No local server required, automatic updates         │
+│                                                       │
+│ • Local - Traditional stdio MCP server                │
+│   Runs via npx, full control over the process         │
+│                                                       │
+└───────────────────────────────────────────────────────┘
+
+Select deployment mode [remote/local]: remote
 
 ┌─ Authentication ──────────────────────────────────────┐
 │                                                       │
 │ To authenticate, you need a Personal Access Token.   │
 │                                                       │
-│ 1. Go to https://app.fizzy.do                        │
-│ 2. Click your avatar → Profile → API                 │
-│ 3. Create a new Personal Access Token                │
+│ Press Enter to open the browser, or paste your token. │
 │                                                       │
 └───────────────────────────────────────────────────────┘
+
+Enter your access token (or press Enter to open browser):
+```
+
+<Aside type="tip">
+  **Quick Tip:** Press Enter without typing anything to automatically open your browser to the Fizzy
+  API settings page where you can create or copy a token.
+</Aside>
+
+After pressing Enter, your browser opens to `https://app.fizzy.do/my/profile/api`:
+
+```
+Opening browser to https://app.fizzy.do/my/profile/api...
 
 Enter your access token: ********
 ```
@@ -75,7 +154,39 @@ After entering your token:
 ✔ Welcome, Ryan Carniato!
 
 Account: ryan
+```
 
+### API Key Configuration (Remote Mode)
+
+When using remote mode, you'll be prompted for an optional API key:
+
+```
+┌─ API Key (Optional) ──────────────────────────────────┐
+│                                                       │
+│ An API key increases your rate limits:                │
+│                                                       │
+│ • Anonymous:  100 writes/day                          │
+│ • With key:   1,000 writes/day                        │
+│                                                       │
+│ Get an API key at https://app.fizzy.do/my/profile/api │
+│                                                       │
+└───────────────────────────────────────────────────────┘
+
+Enter API key (or press Enter to skip): fmcp_xxxxxxxxxxxxx
+
+✔ API key validated
+```
+
+<Aside type="note">
+  API keys use the prefix `fmcp_` (Fizzy MCP) and are different from Personal Access Tokens which
+  use `fz_`. API keys are only used for rate limiting in remote mode.
+</Aside>
+
+### Agent Auto-Configuration
+
+After authentication, the CLI detects and configures your AI agents:
+
+```
 ┌─ Detected AI Agents ──────────────────────────────────┐
 │                                                       │
 │ • Claude Desktop                                      │
@@ -84,7 +195,46 @@ Account: ryan
 │                                                       │
 └───────────────────────────────────────────────────────┘
 
-Would you like to configure Fizzy for these agents? [Y/n]
+Would you like to configure Fizzy for these agents? [Y/n] y
+
+Configuring for remote mode...
+
+✔ Configured Claude Desktop
+  → ~/.config/Claude/claude_desktop_config.json
+
+✔ Configured Cursor
+  → ~/.cursor/mcp.json
+
+✔ Configured OpenCode
+  → ~/.config/opencode/opencode.json
+
+Done! Restart your AI agents to activate Fizzy MCP.
+```
+
+## Rate Limits (Remote Mode)
+
+Remote mode enforces rate limits to ensure fair usage:
+
+| Tier         | Write Operations | Read Operations |
+| ------------ | ---------------- | --------------- |
+| Anonymous    | 100/day          | Unlimited       |
+| With API Key | 1,000/day        | Unlimited       |
+
+<Aside type="tip">
+  Write operations include creating, updating, deleting, and moving cards. Read operations (listing
+  boards, viewing cards, etc.) are unlimited.
+</Aside>
+
+To upgrade your rate limits, add an API key:
+
+```bash
+npx @fizzy-mcp/server auth --api-key fmcp_xxxxxxxxxxxxx
+```
+
+Or reconfigure:
+
+```bash
+npx @fizzy-mcp/server auth --mode remote
 ```
 
 ## Account Selection
@@ -103,7 +253,8 @@ Account slug: /acme
 ```
 
 <Aside type="tip">
-  If you leave this blank, Fizzy MCP will auto-detect the account at runtime, which is useful if you switch between accounts frequently.
+  If you leave this blank, Fizzy MCP will auto-detect the account at runtime, which is useful if you
+  switch between accounts frequently.
 </Aside>
 
 ## Verifying Authentication
@@ -111,7 +262,7 @@ Account slug: /acme
 Check your authentication status:
 
 ```bash
-fizzy-mcp whoami
+npx @fizzy-mcp/server whoami
 ```
 
 Output:
@@ -121,6 +272,10 @@ Name: Ryan Carniato
 Email: ryan@example.com
 Avatar: https://...
 
+Mode: remote
+Endpoint: https://fizzy-mcp-hosted.ryanyogan.workers.dev/mcp
+API Key: fmcp_xxx...xxx (configured)
+
 Accounts:
   - Personal (/ryan) (active)
   - Acme Corp (/acme)
@@ -128,18 +283,30 @@ Accounts:
 
 ## Token Security
 
-Fizzy MCP stores your token securely:
+Fizzy MCP stores your credentials securely:
 
 - **File permissions**: Config file is created with mode `600` (owner-only read/write)
 - **Hidden input**: Token is not displayed when typing
 - **No logging**: Tokens are never logged or transmitted except to the Fizzy API
+- **Secure storage**: API keys are stored separately from access tokens
 
-### Where Tokens Are Stored
+### Where Credentials Are Stored
 
-| Platform | Location |
-|----------|----------|
-| macOS/Linux | `~/.config/fizzy-mcp/config.json` |
-| Windows | `%USERPROFILE%\.config\fizzy-mcp\config.json` |
+| Platform    | Location                                      |
+| ----------- | --------------------------------------------- |
+| macOS/Linux | `~/.config/fizzy-mcp/config.json`             |
+| Windows     | `%USERPROFILE%\.config\fizzy-mcp\config.json` |
+
+### Config File Structure
+
+```json
+{
+  "mode": "remote",
+  "accessToken": "fz_xxxxxxxxxxxxx",
+  "apiKey": "fmcp_xxxxxxxxxxxxx",
+  "accountSlug": "/ryan"
+}
+```
 
 ## Revoking Tokens
 
@@ -152,7 +319,7 @@ To revoke a token:
 Then clear local credentials:
 
 ```bash
-fizzy-mcp logout
+npx @fizzy-mcp/server logout
 ```
 
 ## Using Environment Variables
@@ -160,11 +327,25 @@ fizzy-mcp logout
 For CI/CD or server deployments, use environment variables:
 
 ```bash
+# Required
 export FIZZY_ACCESS_TOKEN=fz_xxxxxxxxxxxxx
+
+# Optional
 export FIZZY_ACCOUNT_SLUG=/my-org
+export FIZZY_MODE=remote
+export FIZZY_API_KEY=fmcp_xxxxxxxxxxxxx
 ```
 
 These take precedence over the config file.
+
+### Environment Variable Reference
+
+| Variable             | Description                           | Example              |
+| -------------------- | ------------------------------------- | -------------------- |
+| `FIZZY_ACCESS_TOKEN` | Personal Access Token (required)      | `fz_xxxxxxxxxxxxx`   |
+| `FIZZY_ACCOUNT_SLUG` | Account to use                        | `/my-org`            |
+| `FIZZY_MODE`         | Deployment mode                       | `remote` or `local`  |
+| `FIZZY_API_KEY`      | API key for rate limits (remote only) | `fmcp_xxxxxxxxxxxxx` |
 
 ## Troubleshooting
 
@@ -172,7 +353,19 @@ These take precedence over the config file.
 
 - Ensure the token is copied correctly (no extra spaces)
 - Check that the token hasn't been revoked
-- Verify you're using a PAT, not another type of credential
+- Verify you're using a PAT (prefix `fz_`), not an API key (prefix `fmcp_`)
+
+### "Invalid API key"
+
+- Ensure the API key starts with `fmcp_`
+- Check that the key hasn't been revoked
+- Note: API keys are only used in remote mode
+
+### "Rate limit exceeded"
+
+- Add an API key to increase your limit to 1,000 writes/day
+- Wait until the rate limit resets (daily)
+- Consider switching to local mode for unlimited writes
 
 ### "No accessible accounts"
 
@@ -183,6 +376,15 @@ These take precedence over the config file.
 
 - Check your internet connection
 - Verify the Fizzy API is accessible: `curl https://app.fizzy.do/api/health`
+- For remote mode, verify the hosted service: `curl https://fizzy-mcp-hosted.ryanyogan.workers.dev/health`
+
+### Browser doesn't open
+
+If pressing Enter doesn't open your browser:
+
+1. Manually navigate to [https://app.fizzy.do/my/profile/api](https://app.fizzy.do/my/profile/api)
+2. Copy your token
+3. Paste it at the prompt
 
 ## Next Steps
 

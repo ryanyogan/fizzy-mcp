@@ -3,7 +3,7 @@ title: Quick Start
 description: Get up and running with Fizzy MCP in minutes
 ---
 
-import { Aside, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+import { Aside, Steps, Tabs, TabItem, Card, CardGrid } from '@astrojs/starlight/components';
 
 # Quick Start
 
@@ -15,6 +15,29 @@ This guide gets you from zero to managing Fizzy tasks with your AI assistant in 
 - A Fizzy account with a Personal Access Token
 - An MCP-compatible AI agent (Claude Desktop, Cursor, or OpenCode)
 
+## Choose Your Mode
+
+Fizzy MCP supports two deployment modes:
+
+<CardGrid>
+  <Card title="Remote Mode (Recommended)" icon="rocket">
+    **Zero maintenance.** Uses our hosted service with HTTP transport. No local server process to
+    manage. - Automatic updates - No Node.js process running - Rate limits apply (upgradeable with
+    API key)
+  </Card>
+  <Card title="Local Mode" icon="laptop">
+    **Full control.** Traditional stdio MCP server running locally via npx. - No rate limits - Works
+    offline - Requires Node.js runtime
+  </Card>
+</CardGrid>
+
+<Aside type="tip">
+  **We recommend Remote Mode** for most users. It's simpler to set up and maintain. Choose Local
+  Mode only if you need offline access or prefer not to use the hosted service.
+</Aside>
+
+## Quick Start (Remote Mode)
+
 <Steps>
 
 1. **Install and Authenticate**
@@ -23,34 +46,125 @@ This guide gets you from zero to managing Fizzy tasks with your AI assistant in 
    npx @fizzy-mcp/server auth
    ```
 
-   Follow the prompts to enter your token and select an account.
+   When prompted for deployment mode, select **remote** (or just press Enter for the default).
 
-2. **Auto-Configure Your AI Agent**
+2. **Get Your Access Token**
 
-   When prompted, select your AI agent(s) to configure:
+   At the token prompt, press **Enter** to open your browser to the Fizzy API settings page:
+
+   ```
+   Enter your access token (or press Enter to open browser):
+   Opening browser to https://app.fizzy.do/my/profile/api...
+   ```
+
+   Copy your token and paste it back in the terminal.
+
+3. **Optional: Add an API Key**
+
+   For higher rate limits (1,000 writes/day vs 100), enter an API key when prompted:
+
+   ```
+   Enter API key (or press Enter to skip): fmcp_xxxxxxxxxxxxx
+   ```
+
+4. **Auto-Configure Your AI Agent**
+
+   When prompted, confirm to configure your AI agents:
 
    ```
    Would you like to configure Fizzy for these agents? [Y/n] y
-   
+
+   Configuring for remote mode...
+
    ✔ Configured Claude Desktop
      → ~/.config/Claude/claude_desktop_config.json
    ```
 
-3. **Restart Your AI Agent**
+5. **Restart Your AI Agent**
 
    Close and reopen your AI agent (Claude Desktop, Cursor, etc.) to load the new MCP server.
 
-4. **Start Using Fizzy!**
+6. **Start Using Fizzy!**
 
    Try these commands with your AI:
 
    > "Show me my Fizzy boards"
-   
+
    > "Create a card on the Engineering board called 'Fix login bug'"
-   
+
    > "What cards are assigned to me?"
 
 </Steps>
+
+## Quick Start (Local Mode)
+
+<Steps>
+
+1. **Install and Authenticate**
+
+   ```bash
+   npx @fizzy-mcp/server auth --mode local
+   ```
+
+2. **Get Your Access Token**
+
+   Press **Enter** to open your browser, or paste your token directly:
+
+   ```
+   Enter your access token (or press Enter to open browser): fz_xxxxxxxxxxxxx
+   ```
+
+3. **Auto-Configure Your AI Agent**
+
+   Confirm to configure your agents for local mode:
+
+   ```
+   Would you like to configure Fizzy for these agents? [Y/n] y
+
+   Configuring for local mode...
+
+   ✔ Configured Claude Desktop
+     → ~/.config/Claude/claude_desktop_config.json
+   ```
+
+4. **Restart Your AI Agent**
+
+   Close and reopen your AI agent to load the MCP server.
+
+5. **Start Using Fizzy!**
+
+   Try these commands with your AI:
+
+   > "Show me my Fizzy boards"
+
+   > "Create a card on the Engineering board called 'Fix login bug'"
+
+</Steps>
+
+## CLI Options Reference
+
+The `auth` command supports several options for non-interactive setup:
+
+```bash
+# Default: interactive remote mode
+npx @fizzy-mcp/server auth
+
+# Explicitly set mode
+npx @fizzy-mcp/server auth --mode remote
+npx @fizzy-mcp/server auth --mode local
+
+# Remote mode with API key (higher rate limits)
+npx @fizzy-mcp/server auth --mode remote --api-key fmcp_xxxxxxxxxxxxx
+
+# Skip agent configuration
+npx @fizzy-mcp/server auth --no-configure
+```
+
+| Option            | Short | Description                                       |
+| ----------------- | ----- | ------------------------------------------------- |
+| `--mode <mode>`   | `-m`  | Deployment mode: `remote` (default) or `local`    |
+| `--api-key <key>` | `-k`  | API key for higher rate limits (remote mode only) |
+| `--no-configure`  |       | Skip auto-configuration of AI agents              |
 
 ## Example Conversations
 
@@ -89,6 +203,7 @@ Created card #142: "Implement OAuth login" on the Engineering board.
 **You:** "Tag card #142 with 'urgent' and 'backend'"
 
 **Claude:** I've added both tags to card #142:
+
 - #urgent
 - #backend
 
@@ -100,11 +215,94 @@ Created card #142: "Implement OAuth login" on the Engineering board.
 
 ## Manual Configuration
 
-If auto-configuration doesn't work, you can manually add Fizzy MCP to your agent:
+If auto-configuration doesn't work, you can manually add Fizzy MCP to your agent's config file.
+
+### Remote Mode Configuration
 
 <Tabs>
   <TabItem label="Claude Desktop">
-    Edit `~/.config/Claude/claude_desktop_config.json`:
+    Edit `~/.config/Claude/claude_desktop_config.json` (Linux/macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
+    
+    ```json
+    {
+      "mcpServers": {
+        "fizzy": {
+          "type": "http",
+          "url": "https://fizzy-mcp-hosted.ryanyogan.workers.dev/mcp",
+          "headers": {
+            "Authorization": "Bearer fz_xxxxxxxxxxxxx",
+            "X-Fizzy-Api-Key": "fmcp_xxxxxxxxxxxxx"
+          }
+        }
+      }
+    }
+    ```
+    
+    <Aside type="note">
+      The `X-Fizzy-Api-Key` header is optional. Include it for higher rate limits (1,000 writes/day vs 100).
+    </Aside>
+  </TabItem>
+  <TabItem label="Cursor">
+    Edit `~/.cursor/mcp.json`:
+    
+    ```json
+    {
+      "mcpServers": {
+        "fizzy": {
+          "type": "http",
+          "url": "https://fizzy-mcp-hosted.ryanyogan.workers.dev/mcp",
+          "headers": {
+            "Authorization": "Bearer fz_xxxxxxxxxxxxx",
+            "X-Fizzy-Api-Key": "fmcp_xxxxxxxxxxxxx"
+          }
+        }
+      }
+    }
+    ```
+  </TabItem>
+  <TabItem label="OpenCode">
+    Edit `~/.config/opencode/opencode.json`:
+    
+    ```json
+    {
+      "mcp": {
+        "fizzy": {
+          "type": "http",
+          "url": "https://fizzy-mcp-hosted.ryanyogan.workers.dev/mcp",
+          "headers": {
+            "Authorization": "Bearer fz_xxxxxxxxxxxxx",
+            "X-Fizzy-Api-Key": "fmcp_xxxxxxxxxxxxx"
+          }
+        }
+      }
+    }
+    ```
+  </TabItem>
+  <TabItem label="Claude Code">
+    Edit `~/.claude/settings.json`:
+    
+    ```json
+    {
+      "mcpServers": {
+        "fizzy": {
+          "type": "http",
+          "url": "https://fizzy-mcp-hosted.ryanyogan.workers.dev/mcp",
+          "headers": {
+            "Authorization": "Bearer fz_xxxxxxxxxxxxx",
+            "X-Fizzy-Api-Key": "fmcp_xxxxxxxxxxxxx"
+          }
+        }
+      }
+    }
+    ```
+  </TabItem>
+</Tabs>
+
+### Local Mode Configuration
+
+<Tabs>
+  <TabItem label="Claude Desktop">
+    Edit `~/.config/Claude/claude_desktop_config.json` (Linux/macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
     
     ```json
     {
@@ -146,26 +344,133 @@ If auto-configuration doesn't work, you can manually add Fizzy MCP to your agent
     }
     ```
   </TabItem>
+  <TabItem label="Claude Code">
+    Edit `~/.claude/settings.json`:
+    
+    ```json
+    {
+      "mcpServers": {
+        "fizzy": {
+          "command": "npx",
+          "args": ["@fizzy-mcp/server"]
+        }
+      }
+    }
+    ```
+  </TabItem>
 </Tabs>
+
+### Configuration with Environment Variables
+
+For both modes, you can use environment variables instead of storing tokens in config files:
+
+<Tabs>
+  <TabItem label="Remote Mode">
+    ```json
+    {
+      "mcpServers": {
+        "fizzy": {
+          "type": "http",
+          "url": "https://fizzy-mcp-hosted.ryanyogan.workers.dev/mcp",
+          "headers": {
+            "Authorization": "Bearer ${FIZZY_ACCESS_TOKEN}",
+            "X-Fizzy-Api-Key": "${FIZZY_API_KEY}"
+          }
+        }
+      }
+    }
+    ```
+    
+    Then set environment variables:
+    
+    ```bash
+    export FIZZY_ACCESS_TOKEN=fz_xxxxxxxxxxxxx
+    export FIZZY_API_KEY=fmcp_xxxxxxxxxxxxx  # Optional
+    ```
+  </TabItem>
+  <TabItem label="Local Mode">
+    ```json
+    {
+      "mcpServers": {
+        "fizzy": {
+          "command": "npx",
+          "args": ["@fizzy-mcp/server"],
+          "env": {
+            "FIZZY_ACCESS_TOKEN": "${FIZZY_ACCESS_TOKEN}"
+          }
+        }
+      }
+    }
+    ```
+    
+    Then set environment variables:
+    
+    ```bash
+    export FIZZY_ACCESS_TOKEN=fz_xxxxxxxxxxxxx
+    ```
+  </TabItem>
+</Tabs>
+
+## Rate Limits
+
+<Aside type="note">Rate limits only apply to **Remote Mode**. Local mode has no rate limits.</Aside>
+
+| Tier                   | Write Operations | Read Operations |
+| ---------------------- | ---------------- | --------------- |
+| Anonymous (no API key) | 100/day          | Unlimited       |
+| With API Key           | 1,000/day        | Unlimited       |
+
+Write operations include: creating cards, updating cards, deleting cards, moving cards, adding comments, etc.
+
+To check your current usage or upgrade your rate limit:
+
+1. Go to [app.fizzy.do/my/profile/api](https://app.fizzy.do/my/profile/api)
+2. Create or view your API key
+3. Re-run `npx @fizzy-mcp/server auth` to add the key
 
 ## Troubleshooting
 
 ### "fizzy" tools not appearing
 
-1. Verify authentication: `fizzy-mcp status`
+1. Verify authentication: `npx @fizzy-mcp/server whoami`
 2. Check the config was added to your agent's config file
 3. Restart your AI agent completely (not just refresh)
+4. For remote mode, verify the endpoint is accessible:
+   ```bash
+   curl https://fizzy-mcp-hosted.ryanyogan.workers.dev/health
+   ```
 
 ### "Not authenticated" errors
 
-Run `fizzy-mcp auth` again to re-authenticate.
+Run `npx @fizzy-mcp/server auth` again to re-authenticate.
 
-### Slow responses
+### "Rate limit exceeded" (Remote Mode)
+
+- Add an API key: `npx @fizzy-mcp/server auth --api-key fmcp_xxxxxxxxxxxxx`
+- Wait for the daily reset
+- Switch to local mode: `npx @fizzy-mcp/server auth --mode local`
+
+### Slow responses (Local Mode)
 
 The first call may take a few seconds as the server starts. Subsequent calls are faster.
 
+### Connection errors (Remote Mode)
+
+- Check your internet connection
+- Verify the hosted service is running:
+  ```bash
+  curl https://fizzy-mcp-hosted.ryanyogan.workers.dev/health
+  ```
+- Try local mode as a fallback
+
+### Token vs API Key Confusion
+
+- **Access Token** (`fz_`): Required for all modes. Authenticates you with Fizzy.
+- **API Key** (`fmcp_`): Optional, remote mode only. Increases rate limits.
+
 ## Next Steps
 
-- [Tools Reference](/tools/overview/) - Explore all 40 available tools
+- [Tools Reference](/tools/overview/) - Explore all 40+ available tools
 - [Working with Boards](/guides/boards/) - Learn board management
 - [Managing Cards](/guides/cards/) - Master card workflows
+- [Authentication Details](/getting-started/authentication/) - Deep dive into auth options

@@ -1,0 +1,43 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "fizzy-mcp-hosted",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-03-12",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // D1 Database for persistent storage
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "fizzy-mcp-db",
+      "database_id": "90bc3dc0-a6d9-4092-9028-b0404965585a",
+      "migrations_dir": "drizzle",
+    },
+  ],
+
+  // KV Namespace for rate limiting and session cache
+  "kv_namespaces": [
+    {
+      "binding": "KV",
+      "id": "109c381516064abdb7fe5816145119ad",
+    },
+  ],
+
+  // Enable observability for monitoring
+  "observability": {
+    "enabled": true,
+  },
+
+  // Environment variables
+  "vars": {
+    "ENVIRONMENT": "production",
+  },
+
+  // Custom domain configuration
+  "routes": [
+    {
+      "pattern": "mcp.fizzy.yogan.dev",
+      "custom_domain": true,
+    },
+  ],
+}

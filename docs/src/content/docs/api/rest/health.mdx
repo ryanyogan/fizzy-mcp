@@ -1,0 +1,466 @@
+---
+title: Health & Info Endpoints
+description: Service health and information endpoints
+---
+
+import { Aside, Tabs, TabItem, Badge } from '@astrojs/starlight/components';
+
+# Health & Info Endpoints
+
+These endpoints provide information about the Fizzy MCP hosted service status, version, and configuration. They are publicly accessible and do not require authentication.
+
+## Endpoints
+
+| Method | Endpoint      | Description                    |
+| ------ | ------------- | ------------------------------ |
+| `GET`  | `/`           | Service root with links        |
+| `GET`  | `/api/health` | Health check                   |
+| `GET`  | `/api/info`   | Service info with tier details |
+
+---
+
+## GET / <Badge text="Public" variant="success" />
+
+Returns service root information with links to available resources.
+
+### Request
+
+```bash
+curl https://fizzy-mcp-hosted.ryanyogan.workers.dev/
+```
+
+### Response
+
+```json
+{
+  "name": "Fizzy MCP Hosted Service",
+  "version": "0.1.0",
+  "description": "AI-powered task management via Model Context Protocol",
+  "links": {
+    "health": "/api/health",
+    "info": "/api/info",
+    "mcp": "/mcp",
+    "mcpInfo": "/mcp/info",
+    "docs": "https://fizzy.yogan.dev"
+  },
+  "endpoints": {
+    "mcp": "POST /mcp - MCP Streamable HTTP endpoint",
+    "health": "GET /api/health - Service health check",
+    "info": "GET /api/info - Service information",
+    "usage": "GET /api/me/usage - Your usage statistics (requires auth)"
+  }
+}
+```
+
+### Response Fields
+
+| Field         | Type   | Description                               |
+| ------------- | ------ | ----------------------------------------- |
+| `name`        | string | Service name                              |
+| `version`     | string | Current service version                   |
+| `description` | string | Service description                       |
+| `links`       | object | URLs to related resources                 |
+| `endpoints`   | object | Available API endpoints with descriptions |
+
+### Example
+
+<Tabs>
+  <TabItem label="curl">
+```bash
+curl -s https://fizzy-mcp-hosted.ryanyogan.workers.dev/ | jq
+```
+  </TabItem>
+  <TabItem label="JavaScript">
+```javascript
+const response = await fetch('https://fizzy-mcp-hosted.ryanyogan.workers.dev/');
+const data = await response.json();
+
+console.log(`Service: ${data.name} v${data.version}`);
+// Output: Service: Fizzy MCP Hosted Service v0.1.0
+
+````
+  </TabItem>
+  <TabItem label="Python">
+```python
+import requests
+
+response = requests.get('https://fizzy-mcp-hosted.ryanyogan.workers.dev/')
+data = response.json()
+
+print(f"Service: {data['name']} v{data['version']}")
+# Output: Service: Fizzy MCP Hosted Service v0.1.0
+````
+
+  </TabItem>
+</Tabs>
+
+---
+
+## GET /api/health <Badge text="Public" variant="success" />
+
+Returns the current health status of the service. Use this endpoint for monitoring and uptime checks.
+
+### Request
+
+```bash
+curl https://fizzy-mcp-hosted.ryanyogan.workers.dev/api/health
+```
+
+### Response
+
+```json
+{
+  "status": "ok",
+  "timestamp": "2024-01-15T10:30:00.000Z",
+  "version": "0.1.0"
+}
+```
+
+### Response Fields
+
+| Field       | Type   | Description                         |
+| ----------- | ------ | ----------------------------------- |
+| `status`    | string | Service status: `"ok"` when healthy |
+| `timestamp` | string | ISO 8601 timestamp of the response  |
+| `version`   | string | Current service version             |
+
+### Status Values
+
+| Status      | HTTP Code | Description                                           |
+| ----------- | --------- | ----------------------------------------------------- |
+| `ok`        | 200       | Service is healthy and operational                    |
+| `degraded`  | 200       | Service is operational but with reduced functionality |
+| `unhealthy` | 503       | Service is experiencing issues                        |
+
+<Aside type="tip">
+  Use this endpoint for health checks in your monitoring systems. The endpoint is designed to be
+  lightweight and fast.
+</Aside>
+
+### Example: Monitoring Script
+
+<Tabs>
+  <TabItem label="curl">
+```bash
+#!/bin/bash
+# Simple health check script
+
+HEALTH_URL="https://fizzy-mcp-hosted.ryanyogan.workers.dev/api/health"
+
+response=$(curl -s -w "%{http_code}" -o /tmp/health.json "$HEALTH_URL")
+
+if [ "$response" == "200" ]; then
+status=$(jq -r '.status' /tmp/health.json)
+  if [ "$status" == "ok" ]; then
+echo "Service is healthy"
+exit 0
+fi
+fi
+
+echo "Service is unhealthy"
+exit 1
+
+````
+  </TabItem>
+  <TabItem label="JavaScript">
+```javascript
+async function checkHealth() {
+  const url = 'https://fizzy-mcp-hosted.ryanyogan.workers.dev/api/health';
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (response.ok && data.status === 'ok') {
+      console.log(`Healthy - Version: ${data.version}`);
+      return true;
+    }
+
+    console.error(`Unhealthy - Status: ${data.status}`);
+    return false;
+  } catch (error) {
+    console.error(`Health check failed: ${error.message}`);
+    return false;
+  }
+}
+
+// Run check
+checkHealth();
+````
+
+  </TabItem>
+  <TabItem label="Python">
+```python
+import requests
+import sys
+
+def check_health():
+url = 'https://fizzy-mcp-hosted.ryanyogan.workers.dev/api/health'
+
+    try:
+        response = requests.get(url, timeout=10)
+        data = response.json()
+
+        if response.ok and data.get('status') == 'ok':
+            print(f"Healthy - Version: {data['version']}")
+            return True
+
+        print(f"Unhealthy - Status: {data.get('status')}")
+        return False
+
+    except requests.RequestException as e:
+        print(f"Health check failed: {e}")
+        return False
+
+if **name** == '**main**':
+healthy = check_health()
+sys.exit(0 if healthy else 1)
+
+````
+  </TabItem>
+</Tabs>
+
+---
+
+## GET /api/info <Badge text="Public" variant="success" />
+
+Returns detailed service information including rate limits and tier details. This endpoint provides more comprehensive information than the health endpoint.
+
+### Request
+
+```bash
+curl https://fizzy-mcp-hosted.ryanyogan.workers.dev/api/info
+````
+
+### Response
+
+```json
+{
+  "service": {
+    "name": "Fizzy MCP Hosted Service",
+    "version": "0.1.0",
+    "environment": "production"
+  },
+  "status": {
+    "healthy": true,
+    "uptime": "99.99%",
+    "lastRestart": "2024-01-10T00:00:00.000Z"
+  },
+  "rateLimits": {
+    "default": {
+      "requestsPerMinute": 60,
+      "dailyLimit": 1000
+    },
+    "tiers": {
+      "free": {
+        "requestsPerMinute": 60,
+        "dailyLimit": 1000,
+        "features": ["basic_tools", "usage_tracking"]
+      },
+      "pro": {
+        "requestsPerMinute": 300,
+        "dailyLimit": 10000,
+        "features": ["all_tools", "usage_tracking", "priority_support"]
+      },
+      "enterprise": {
+        "requestsPerMinute": 1000,
+        "dailyLimit": -1,
+        "features": [
+          "all_tools",
+          "usage_tracking",
+          "priority_support",
+          "custom_integrations",
+          "sla"
+        ]
+      }
+    }
+  },
+  "capabilities": {
+    "mcp": {
+      "version": "2024-11-05",
+      "transport": "streamable-http",
+      "tools": 40
+    },
+    "api": {
+      "authentication": ["token", "api_key", "session"],
+      "formats": ["json"]
+    }
+  },
+  "links": {
+    "documentation": "https://fizzy.yogan.dev",
+    "support": "https://github.com/fizzy-do/fizzy-mcp/issues",
+    "status": "https://status.fizzy.do"
+  }
+}
+```
+
+### Response Fields
+
+#### Service Object
+
+| Field         | Type   | Description                                      |
+| ------------- | ------ | ------------------------------------------------ |
+| `name`        | string | Service name                                     |
+| `version`     | string | Current version                                  |
+| `environment` | string | Deployment environment (`production`, `staging`) |
+
+#### Status Object
+
+| Field         | Type    | Description                        |
+| ------------- | ------- | ---------------------------------- |
+| `healthy`     | boolean | Overall health status              |
+| `uptime`      | string  | Uptime percentage                  |
+| `lastRestart` | string  | ISO 8601 timestamp of last restart |
+
+#### Rate Limits Object
+
+| Field     | Type   | Description                                      |
+| --------- | ------ | ------------------------------------------------ |
+| `default` | object | Default rate limits for unauthenticated requests |
+| `tiers`   | object | Rate limits by subscription tier                 |
+
+#### Tier Features
+
+| Feature               | Description                |
+| --------------------- | -------------------------- |
+| `basic_tools`         | Access to core MCP tools   |
+| `all_tools`           | Access to all 40 MCP tools |
+| `usage_tracking`      | API usage statistics       |
+| `priority_support`    | Priority support queue     |
+| `custom_integrations` | Custom integration support |
+| `sla`                 | Service Level Agreement    |
+
+#### Capabilities Object
+
+| Field                | Type   | Description                |
+| -------------------- | ------ | -------------------------- |
+| `mcp.version`        | string | MCP protocol version       |
+| `mcp.transport`      | string | Supported transport method |
+| `mcp.tools`          | number | Number of available tools  |
+| `api.authentication` | array  | Supported auth methods     |
+| `api.formats`        | array  | Supported response formats |
+
+### Example: Display Service Info
+
+<Tabs>
+  <TabItem label="curl">
+```bash
+curl -s https://fizzy-mcp-hosted.ryanyogan.workers.dev/api/info | jq '{
+  service: .service.name,
+  version: .service.version,
+  tools: .capabilities.mcp.tools,
+  tiers: [.rateLimits.tiers | keys[]]
+}'
+```
+
+**Output:**
+
+```json
+{
+  "service": "Fizzy MCP Hosted Service",
+  "version": "0.1.0",
+  "tools": 40,
+  "tiers": ["free", "pro", "enterprise"]
+}
+```
+
+  </TabItem>
+  <TabItem label="JavaScript">
+```javascript
+async function getServiceInfo() {
+  const url = 'https://fizzy-mcp-hosted.ryanyogan.workers.dev/api/info';
+  const response = await fetch(url);
+  const info = await response.json();
+  
+  console.log('=== Fizzy MCP Service Info ===');
+  console.log(`Name: ${info.service.name}`);
+  console.log(`Version: ${info.service.version}`);
+  console.log(`Environment: ${info.service.environment}`);
+  console.log(`Healthy: ${info.status.healthy}`);
+  console.log(`MCP Tools: ${info.capabilities.mcp.tools}`);
+  
+  console.log('\n=== Rate Limit Tiers ===');
+  for (const [tier, limits] of Object.entries(info.rateLimits.tiers)) {
+    const daily = limits.dailyLimit === -1 ? 'Unlimited' : limits.dailyLimit;
+    console.log(`${tier}: ${limits.requestsPerMinute} req/min, ${daily} daily`);
+  }
+}
+
+getServiceInfo();
+
+````
+  </TabItem>
+  <TabItem label="Python">
+```python
+import requests
+import json
+
+def get_service_info():
+    url = 'https://fizzy-mcp-hosted.ryanyogan.workers.dev/api/info'
+    response = requests.get(url)
+    info = response.json()
+
+    print('=== Fizzy MCP Service Info ===')
+    print(f"Name: {info['service']['name']}")
+    print(f"Version: {info['service']['version']}")
+    print(f"Environment: {info['service']['environment']}")
+    print(f"Healthy: {info['status']['healthy']}")
+    print(f"MCP Tools: {info['capabilities']['mcp']['tools']}")
+
+    print('\n=== Rate Limit Tiers ===')
+    for tier, limits in info['rateLimits']['tiers'].items():
+        daily = 'Unlimited' if limits['dailyLimit'] == -1 else limits['dailyLimit']
+        print(f"{tier}: {limits['requestsPerMinute']} req/min, {daily} daily")
+
+get_service_info()
+````
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Use Cases
+
+### Uptime Monitoring
+
+Use the `/api/health` endpoint with monitoring services:
+
+```bash
+# Pingdom, UptimeRobot, etc.
+https://fizzy-mcp-hosted.ryanyogan.workers.dev/api/health
+
+# Expected response: HTTP 200 with status: "ok"
+```
+
+### Service Discovery
+
+Use the root endpoint `/` to discover available endpoints:
+
+```javascript
+const root = await fetch('https://fizzy-mcp-hosted.ryanyogan.workers.dev/').then((r) => r.json());
+
+// Dynamically discover MCP endpoint
+const mcpUrl = root.links.mcp;
+```
+
+### Rate Limit Planning
+
+Use `/api/info` to understand rate limits before integration:
+
+```javascript
+const info = await fetch('https://fizzy-mcp-hosted.ryanyogan.workers.dev/api/info').then((r) =>
+  r.json(),
+);
+
+const myTier = 'pro';
+const limits = info.rateLimits.tiers[myTier];
+
+console.log(`My rate limit: ${limits.requestsPerMinute} requests/minute`);
+```
+
+## Next Steps
+
+- [Usage Endpoints](/api/rest/usage/) - Track your API usage
+- [Admin Endpoints](/api/rest/admin/) - Administrative endpoints
+- [MCP Endpoint](/api/mcp-endpoint/) - Connect AI agents

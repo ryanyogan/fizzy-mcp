@@ -3,7 +3,7 @@ title: Introduction
 description: Learn about Fizzy MCP and how it connects AI assistants to Fizzy
 ---
 
-import { Aside, Card, CardGrid } from '@astrojs/starlight/components';
+import { Aside, Card, CardGrid, Tabs, TabItem } from '@astrojs/starlight/components';
 
 # Introduction to Fizzy MCP
 
@@ -36,29 +36,107 @@ Fizzy MCP bridges the gap between your AI assistant and your task management wor
   </Card>
 </CardGrid>
 
+## Deployment Modes
+
+Fizzy MCP offers **two deployment modes** to fit different use cases:
+
+<Tabs>
+  <TabItem label="Remote Mode (Recommended)">
+    Use our hosted MCP service running on Cloudflare Workers. Your AI agent connects via HTTP to `https://fizzy-mcp-hosted.ryanyogan.workers.dev/mcp`.
+
+    **Advantages:**
+    - No local server to run or maintain
+    - Works with any MCP client that supports HTTP transport
+    - Automatic updates - always running the latest version
+    - Perfect for remote development environments
+
+    **Considerations:**
+    - Rate limits apply (100 writes/day anonymous, 1,000/day with API key)
+    - Requires internet connection
+    - Your Fizzy token is sent to the hosted service
+
+    ```json
+    // Example Claude Desktop config (Remote Mode)
+    {
+      "mcpServers": {
+        "fizzy": {
+          "transport": "http",
+          "url": "https://fizzy-mcp-hosted.ryanyogan.workers.dev/mcp",
+          "headers": {
+            "X-Fizzy-Token": "your-fizzy-token"
+          }
+        }
+      }
+    }
+    ```
+
+  </TabItem>
+  <TabItem label="Local Mode">
+    Run the MCP server locally on your machine. Your AI agent connects via stdio (standard input/output).
+
+    **Advantages:**
+    - No rate limits
+    - Works offline (once authenticated)
+    - Token stays on your machine
+    - Full control over the server
+
+    **Considerations:**
+    - Requires Node.js 20+
+    - Server must be installed and available
+    - May need manual updates
+
+    ```json
+    // Example Claude Desktop config (Local Mode)
+    {
+      "mcpServers": {
+        "fizzy": {
+          "command": "npx",
+          "args": ["-y", "fizzy-do-mcp@latest"]
+        }
+      }
+    }
+    ```
+
+  </TabItem>
+</Tabs>
+
 ## Features
 
 ### 40 MCP Tools
 
 Fizzy MCP provides comprehensive API coverage across 7 categories:
 
-| Category | Tools | Description |
-|----------|-------|-------------|
-| Identity | 2 | Account discovery and settings |
-| Boards | 7 | Board CRUD and publishing |
-| Cards | 18 | Card lifecycle, assignments, tags |
-| Comments | 5 | Discussion threads on cards |
-| Columns | 5 | Workflow stage management |
-| Tags | 1 | Label management |
-| Users | 2 | Team member information |
+| Category | Tools | Description                       |
+| -------- | ----- | --------------------------------- |
+| Identity | 2     | Account discovery and settings    |
+| Boards   | 7     | Board CRUD and publishing         |
+| Cards    | 18    | Card lifecycle, assignments, tags |
+| Comments | 5     | Discussion threads on cards       |
+| Columns  | 5     | Workflow stage management         |
+| Tags     | 1     | Label management                  |
+| Users    | 2     | Team member information           |
 
 ### Auto-Configuration
 
-After authentication, Fizzy MCP can automatically detect and configure:
+After authentication, the CLI can automatically detect and configure:
 
 - **Claude Desktop** - Anthropic's official desktop app
 - **Cursor** - AI-powered code editor
 - **OpenCode** - Open-source AI coding assistant
+
+The CLI generates the correct configuration for your chosen mode (remote or local) and writes it directly to the agent's config file.
+
+### CLI Commands
+
+Fizzy MCP includes a full-featured CLI for setup and management:
+
+| Command               | Description                                     |
+| --------------------- | ----------------------------------------------- |
+| `fizzy-mcp auth`      | Configure authentication (mode, token, API key) |
+| `fizzy-mcp configure` | Auto-configure AI agents                        |
+| `fizzy-mcp whoami`    | Show current identity and account               |
+| `fizzy-mcp status`    | Check configuration status                      |
+| `fizzy-mcp logout`    | Clear stored credentials                        |
 
 ### Type-Safe Client
 
@@ -89,6 +167,8 @@ Automatic retry logic with exponential backoff:
 
 ## How It Works
 
+### Remote Mode Flow
+
 ```
 ┌─────────────────┐
 │   You (Human)   │
@@ -107,10 +187,57 @@ Automatic retry logic with exponential backoff:
 │  your request   │
 └────────┬────────┘
          │
-         ▼ MCP Protocol
+         ▼ MCP over HTTP
+┌─────────────────┐
+│  Fizzy MCP      │
+│  Hosted Service │
+│                 │
+│  Cloudflare     │
+│  Workers        │
+└────────┬────────┘
+         │
+         ▼ HTTPS
+┌─────────────────┐
+│   Fizzy API     │
+│                 │
+│  Creates card   │
+│  Returns data   │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│   AI Assistant  │
+│                 │
+│  "Created card  │
+│   #42: Fix      │
+│   login bug"    │
+└─────────────────┘
+```
+
+### Local Mode Flow
+
+```
+┌─────────────────┐
+│   You (Human)   │
+│                 │
+│  "Create a new  │
+│   card called   │
+│   Fix login"    │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│   AI Assistant  │
+│ (Claude, etc.)  │
+│                 │
+│  Understands    │
+│  your request   │
+└────────┬────────┘
+         │
+         ▼ MCP via stdio
 ┌─────────────────┐
 │   Fizzy MCP     │
-│    Server       │
+│   Local Server  │
 │                 │
 │  fizzy_create_  │
 │  card tool      │
@@ -139,8 +266,13 @@ Automatic retry logic with exponential backoff:
 Before getting started, you'll need:
 
 1. **A Fizzy account** - Sign up at [app.fizzy.do](https://app.fizzy.do)
-2. **Node.js 20+** - Required for running the MCP server
+2. **Node.js 20+** - Required for the CLI and local mode
 3. **An MCP-compatible AI agent** - Claude Desktop, Cursor, or OpenCode
+
+<Aside type="tip">
+  For **remote mode**, you only need Node.js to run the initial `fizzy-mcp auth` command. After
+  that, your AI agent connects directly to the hosted service.
+</Aside>
 
 ## Next Steps
 

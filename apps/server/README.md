@@ -10,75 +10,59 @@ An MCP (Model Context Protocol) server that enables AI agents to interact with [
 - **Auto-detection** of Fizzy account on first run
 - **Secure credential storage** in `~/.config/fizzy-mcp/config.json`
 - **Environment variable support** for CI/CD and containerized deployments
+- **Two deployment modes**: Local (stdio) or Remote (hosted service)
 
-## Getting Started
-
-### 1. Get a Fizzy Access Token
-
-1. Go to [app.fizzy.do](https://app.fizzy.do)
-2. Click your avatar in the top right
-3. Go to **Profile** → **API**
-4. Create a new **Personal Access Token**
-5. Copy the token (you won't see it again!)
-
-### 2. Install and Configure
+## Quick Start
 
 ```bash
 # Install globally
 npm install -g fizzy-do-mcp
 
-# Configure with your access token
+# Run the setup wizard
 fizzy-mcp auth
 ```
 
-Or use environment variables:
+The CLI will guide you through:
+1. **Choosing a mode** - Remote (recommended) or Local
+2. **Getting your Fizzy token** - Press Enter to open the Fizzy API page in your browser
+3. **Optional API key** - For higher rate limits on the hosted service
 
-```bash
-export FIZZY_ACCESS_TOKEN="your-token-here"
-export FIZZY_ACCOUNT_SLUG="/897362094"  # Optional, auto-detected if omitted
-```
+## Deployment Modes
 
-### 3. Add to Claude Desktop
+### Remote Mode (Recommended)
 
-Add this to your Claude Desktop configuration (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
+Uses our hosted MCP service. No local server needed.
+- **Endpoint**: `https://fizzy-mcp-hosted.ryanyogan.workers.dev/mcp`
+- **Rate Limits**: 100 writes/day (free), 1,000/day (with API key)
 
-```json
-{
-  "mcpServers": {
-    "fizzy": {
-      "command": "npx",
-      "args": ["fizzy-do-mcp"]
-    }
-  }
-}
-```
+### Local Mode
 
-Or if installed globally:
+Runs the MCP server locally via stdio transport.
+- Full control over your environment
+- No rate limits
+- Requires Node.js
 
-```json
-{
-  "mcpServers": {
-    "fizzy": {
-      "command": "fizzy-mcp"
-    }
-  }
-}
-```
+## Getting a Fizzy Access Token
 
-### 4. Start Using
+When you run `fizzy-mcp auth`, pressing Enter at the token prompt will automatically open your browser to the Fizzy API settings page:
 
-Restart Claude Desktop and you'll have access to all Fizzy tools. Try asking:
-
-- "List all my Fizzy boards"
-- "Show me cards assigned to me"
-- "Create a new card on the Engineering board called 'Review PR #123'"
-- "Close card #42 and add a comment saying it's done"
+1. The browser opens [app.fizzy.do/my/profile/api](https://app.fizzy.do/my/profile/api)
+2. Click **New Personal Access Token**
+3. Give it a name and copy the token
+4. Paste it back in the CLI
 
 ## CLI Commands
 
 ```bash
-# Configure authentication interactively
+# Interactive setup wizard
 fizzy-mcp auth
+
+# Setup with specific mode
+fizzy-mcp auth --mode remote
+fizzy-mcp auth --mode local
+
+# Setup with all options
+fizzy-mcp auth --mode remote --token <token> --api-key <fmcp_key>
 
 # Check current configuration
 fizzy-mcp status
@@ -86,11 +70,74 @@ fizzy-mcp status
 # Show your Fizzy identity and accounts
 fizzy-mcp whoami
 
+# Auto-configure AI agents
+fizzy-mcp configure
+
 # Clear stored credentials
 fizzy-mcp logout
 
-# Run the MCP server (default command)
+# Run the local MCP server (only in local mode)
 fizzy-mcp
+```
+
+## Configuration for AI Agents
+
+### Remote Mode (HTTP transport)
+
+```json
+{
+  "mcpServers": {
+    "fizzy": {
+      "transport": "http",
+      "url": "https://fizzy-mcp-hosted.ryanyogan.workers.dev/mcp",
+      "headers": {
+        "X-Fizzy-Token": "<your-fizzy-token>",
+        "X-API-Key": "<optional-api-key>"
+      }
+    }
+  }
+}
+```
+
+### Local Mode (stdio transport)
+
+**Claude Desktop** (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "fizzy": {
+      "command": "npx",
+      "args": ["-y", "fizzy-do-mcp@latest"]
+    }
+  }
+}
+```
+
+**OpenCode** (`~/.config/opencode/opencode.json`):
+
+```json
+{
+  "mcp": {
+    "fizzy": {
+      "type": "local",
+      "command": ["npx", "-y", "fizzy-do-mcp@latest"]
+    }
+  }
+}
+```
+
+**Cursor** (`~/.cursor/mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "fizzy": {
+      "command": "npx",
+      "args": ["-y", "fizzy-do-mcp@latest"]
+    }
+  }
+}
 ```
 
 ## Available Tools
@@ -109,8 +156,8 @@ fizzy-mcp
 | `fizzy_create_board` | Create a new board |
 | `fizzy_update_board` | Update board name or settings |
 | `fizzy_delete_board` | Delete a board |
-| `fizzy_archive_board` | Archive a board |
-| `fizzy_unarchive_board` | Unarchive a board |
+| `fizzy_publish_board` | Publish board (make public) |
+| `fizzy_unpublish_board` | Unpublish board |
 
 ### Cards (18 tools)
 | Tool | Description |
@@ -167,85 +214,50 @@ fizzy-mcp
 
 ### Config File
 
-Stored at `~/.config/fizzy-mcp/config.json` with mode 600 (owner read/write only):
+Stored at `~/.config/fizzy-mcp/config.json` with mode 600:
 
 ```json
 {
-  "accessToken": "your-token",
+  "mode": "remote",
+  "accessToken": "your-fizzy-token",
   "accountSlug": "/897362094",
-  "baseUrl": "https://app.fizzy.do"
+  "hostedApiKey": "fmcp_..."
 }
 ```
 
 ### Environment Variables
 
-Environment variables take precedence over the config file:
-
 | Variable | Description |
 |----------|-------------|
 | `FIZZY_ACCESS_TOKEN` | Personal access token (required) |
-| `FIZZY_ACCOUNT_SLUG` | Account slug, e.g., `/897362094` (optional, auto-detected) |
+| `FIZZY_ACCOUNT_SLUG` | Account slug (optional, auto-detected) |
 | `FIZZY_BASE_URL` | API base URL (default: `https://app.fizzy.do`) |
+| `FIZZY_MCP_MODE` | Server mode: `remote` or `local` |
+| `FIZZY_MCP_API_KEY` | Hosted service API key |
 
 ## Development
-
-### Project Structure
-
-```
-fizzy-mcp/
-├── packages/
-│   ├── shared/     # Types, schemas, Result type, errors
-│   ├── client/     # Type-safe HTTP client for Fizzy API
-│   └── tools/      # MCP tool definitions
-├── apps/
-│   └── server/     # MCP server and CLI
-├── turbo.json      # Turborepo config
-└── pnpm-workspace.yaml
-```
-
-### Local Development
 
 ```bash
 # Install dependencies
 pnpm install
 
-# Build all packages
+# Build
 pnpm build
 
-# Run type checker
-pnpm typecheck
-
-# Run linter
-pnpm lint
-
-# Format code
-pnpm format
-```
-
-### Testing Locally
-
-```bash
-# Configure with your token
-cd apps/server
+# Run locally
 node dist/cli.js auth
-
-# Check status
 node dist/cli.js status
-
-# Run the server (for testing with MCP inspector)
 node dist/index.js
 ```
 
 ## Architecture
 
-The project uses a monorepo structure with clear separation of concerns:
+This package is part of the fizzy-mcp monorepo:
 
-- **@fizzy-mcp/shared** - Core types, Zod schemas, Result type for error handling
-- **@fizzy-mcp/client** - Fizzy API client with dependency injection, retry logic
-- **@fizzy-mcp/tools** - MCP tool registration, maps client methods to MCP tools
-- **fizzy-do-mcp** - Entry point, CLI, credential management (published to npm)
-
-All packages are built with [tsup](https://tsup.egoist.dev/) targeting ES2022 and are fully tree-shakeable.
+- **@fizzy-mcp/shared** - Core types, Zod schemas, Result type
+- **@fizzy-mcp/client** - Fizzy API client with retry logic
+- **@fizzy-mcp/tools** - MCP tool definitions
+- **fizzy-do-mcp** - This package: CLI and local MCP server
 
 ## License
 

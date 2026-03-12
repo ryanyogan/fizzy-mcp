@@ -10,6 +10,7 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
+import { type ServerMode, HOSTED_URLS } from '@fizzy-mcp/shared';
 
 /**
  * Supported AI agents that can be auto-configured.
@@ -28,21 +29,53 @@ export interface AgentInfo {
 }
 
 /**
- * MCP server configuration for Fizzy (Claude Desktop / Cursor format).
+ * MCP server configuration for Fizzy - Local mode (Claude Desktop / Cursor format).
  */
-export interface McpServerConfig {
+export interface McpServerConfigLocal {
   command: string;
   args: string[];
   env?: Record<string, string>;
 }
 
 /**
- * MCP server configuration for OpenCode format.
+ * MCP server configuration for Fizzy - Remote mode (HTTP transport).
  */
-export interface OpenCodeServerConfig {
+export interface McpServerConfigRemote {
+  transport: 'http';
+  url: string;
+  headers: Record<string, string>;
+}
+
+/**
+ * MCP server configuration for OpenCode - Local mode.
+ */
+export interface OpenCodeServerConfigLocal {
   type: 'local';
   command: string[];
   env?: Record<string, string>;
+}
+
+/**
+ * MCP server configuration for OpenCode - Remote mode.
+ */
+export interface OpenCodeServerConfigRemote {
+  type: 'http';
+  url: string;
+  headers: Record<string, string>;
+}
+
+export type McpServerConfig = McpServerConfigLocal | McpServerConfigRemote;
+export type OpenCodeServerConfig = OpenCodeServerConfigLocal | OpenCodeServerConfigRemote;
+
+/**
+ * Configuration options for generating server config.
+ */
+export interface ServerConfigOptions {
+  mode: ServerMode;
+  accessToken: string;
+  accountSlug?: string;
+  hostedApiKey?: string;
+  hostedUrl?: string;
 }
 
 /**
@@ -60,9 +93,19 @@ function getClaudeDesktopConfigPath(): string {
   const home = getHome();
 
   if (platform === 'darwin') {
-    return path.join(home, 'Library', 'Application Support', 'Claude', 'claude_desktop_config.json');
+    return path.join(
+      home,
+      'Library',
+      'Application Support',
+      'Claude',
+      'claude_desktop_config.json',
+    );
   } else if (platform === 'win32') {
-    return path.join(process.env.APPDATA || path.join(home, 'AppData', 'Roaming'), 'Claude', 'claude_desktop_config.json');
+    return path.join(
+      process.env.APPDATA || path.join(home, 'AppData', 'Roaming'),
+      'Claude',
+      'claude_desktop_config.json',
+    );
   } else {
     // Linux
     return path.join(home, '.config', 'Claude', 'claude_desktop_config.json');
@@ -95,7 +138,7 @@ export function detectAgents(): AgentInfo[] {
     {
       type: 'claude-desktop',
       name: 'Claude Desktop',
-      description: 'Anthropic\'s official Claude desktop app',
+      description: "Anthropic's official Claude desktop app",
       configPath: getClaudeDesktopConfigPath(),
       exists: false,
     },
@@ -137,9 +180,47 @@ export function getAvailableAgents(): AgentInfo[] {
  * Generates the Fizzy MCP server configuration for a specific agent.
  *
  * @param agentType - The type of agent to generate config for
+ * @param options - Configuration options (mode, credentials, etc.)
  * @returns The MCP server configuration object
  */
-export function generateServerConfig(agentType: AgentType): McpServerConfig | OpenCodeServerConfig {
+export function generateServerConfig(
+  agentType: AgentType,
+  options: ServerConfigOptions,
+): McpServerConfig | OpenCodeServerConfig {
+  const { mode, accessToken, accountSlug, hostedApiKey, hostedUrl } = options;
+
+  if (mode === 'remote') {
+    // Remote mode - use HTTP transport
+    const url = hostedUrl || HOSTED_URLS.mcp;
+    const headers: Record<string, string> = {
+      'X-Fizzy-Token': accessToken,
+    };
+
+    if (accountSlug) {
+      headers['X-Fizzy-Account-Slug'] = accountSlug;
+    }
+
+    if (hostedApiKey) {
+      headers['X-API-Key'] = hostedApiKey;
+    }
+
+    if (agentType === 'opencode') {
+      return {
+        type: 'http',
+        url,
+        headers,
+      };
+    }
+
+    // Claude Desktop and Cursor
+    return {
+      transport: 'http',
+      url,
+      headers,
+    };
+  }
+
+  // Local mode - use stdio transport
   if (agentType === 'opencode') {
     // OpenCode uses command as an array, no separate args
     return {
@@ -191,28 +272,23 @@ export function writeAgentConfig(configPath: string, config: Record<string, unkn
  * Adds Fizzy MCP server to an agent's configuration.
  *
  * @param agent - The agent to configure
+ * @param options - Configuration options (mode, credentials, etc.)
  * @returns true if configuration was added/updated, false if already present
  */
-export function configureAgent(agent: AgentInfo): boolean {
+export function configureAgent(agent: AgentInfo, options: ServerConfigOptions): boolean {
   const existingConfig = readAgentConfig(agent.configPath) || {};
-  const serverConfig = generateServerConfig(agent.type);
+  const serverConfig = generateServerConfig(agent.type, options);
 
   let configKey: string;
-  let serverKey: string;
+  const serverKey = 'fizzy';
 
   switch (agent.type) {
     case 'claude-desktop':
-      configKey = 'mcpServers';
-      serverKey = 'fizzy';
-      break;
     case 'cursor':
       configKey = 'mcpServers';
-      serverKey = 'fizzy';
       break;
     case 'opencode':
       configKey = 'mcp';
-      serverKey = 'fizzy';
-      // OpenCode uses a slightly different format
       break;
     default:
       return false;
@@ -221,12 +297,7 @@ export function configureAgent(agent: AgentInfo): boolean {
   // Get or create the servers section
   const servers = (existingConfig[configKey] as Record<string, unknown>) || {};
 
-  // Check if already configured
-  if (servers[serverKey]) {
-    return false;
-  }
-
-  // Add Fizzy server config (format already correct from generateServerConfig)
+  // Always update the config to ensure it has the latest credentials/mode
   servers[serverKey] = serverConfig;
 
   existingConfig[configKey] = servers;

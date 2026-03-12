@@ -7,7 +7,7 @@ import { Aside, Tabs, TabItem, Steps } from '@astrojs/starlight/components';
 
 # Installation
 
-Fizzy MCP can be installed globally or run directly with `npx`.
+Fizzy MCP can be installed globally or run directly with `npx`. The CLI guides you through choosing a deployment mode and configuring your AI agents.
 
 ## Quick Start
 
@@ -17,26 +17,19 @@ The fastest way to get started is with `npx`:
 npx fizzy-do-mcp auth
 ```
 
-This downloads and runs the latest version, then guides you through authentication.
+This downloads and runs the latest version, then guides you through:
+
+1. Choosing a deployment mode (Remote or Local)
+2. Getting your Fizzy Personal Access Token
+3. Optionally configuring an API key (for higher rate limits in remote mode)
+4. Auto-configuring detected AI agents
 
 ## Package Managers
 
 <Tabs>
-  <TabItem label="npm">
-    ```bash
-    npm install -g fizzy-do-mcp
-    ```
-  </TabItem>
-  <TabItem label="pnpm">
-    ```bash
-    pnpm add -g fizzy-do-mcp
-    ```
-  </TabItem>
-  <TabItem label="yarn">
-    ```bash
-    yarn global add fizzy-do-mcp
-    ```
-  </TabItem>
+  <TabItem label="npm">```bash npm install -g fizzy-do-mcp ```</TabItem>
+  <TabItem label="pnpm">```bash pnpm add -g fizzy-do-mcp ```</TabItem>
+  <TabItem label="yarn">```bash yarn global add fizzy-do-mcp ```</TabItem>
 </Tabs>
 
 After installation, the `fizzy-mcp` command is available globally.
@@ -49,34 +42,70 @@ Check that Fizzy MCP is installed correctly:
 fizzy-mcp --version
 ```
 
-You should see the version number (e.g., `0.1.0`).
+You should see the version number (e.g., `0.1.2`).
 
 ## System Requirements
 
-| Requirement | Version |
-|-------------|---------|
-| Node.js | 20.0.0 or higher |
-| npm/pnpm/yarn | Any recent version |
+| Requirement      | Version               |
+| ---------------- | --------------------- |
+| Node.js          | 20.0.0 or higher      |
+| npm/pnpm/yarn    | Any recent version    |
 | Operating System | macOS, Linux, Windows |
 
 <Aside type="tip">
-  Node.js 20+ is required for ES modules support and modern JavaScript features.
+  Node.js 20+ is required for ES modules support and modern JavaScript features. For **remote
+  mode**, you only need Node.js to run the CLI - your AI agent connects directly to the hosted
+  service.
 </Aside>
 
 ## CLI Commands
 
-Fizzy MCP provides several CLI commands:
+Fizzy MCP provides several CLI commands for setup and management:
 
 ### `fizzy-mcp auth`
 
-Configure authentication with your Fizzy Personal Access Token.
+Configure authentication with your Fizzy Personal Access Token. This is the main setup command.
 
 ```bash
 fizzy-mcp auth
 ```
 
-Options:
-- `-t, --token <token>` - Provide token directly (will prompt if not provided)
+**Options:**
+
+| Option                | Description                                          |
+| --------------------- | ---------------------------------------------------- |
+| `-t, --token <token>` | Provide token directly (will prompt if not provided) |
+| `-m, --mode <mode>`   | Server mode: `remote` or `local`                     |
+| `-k, --api-key <key>` | Hosted service API key (for higher rate limits)      |
+| `--no-configure`      | Skip auto-configuration of AI agents                 |
+
+**Examples:**
+
+```bash
+# Interactive setup (recommended)
+fizzy-mcp auth
+
+# Non-interactive with all options
+fizzy-mcp auth --mode remote --token fz_xxx --api-key fmcp_xxx
+
+# Local mode, skip agent configuration
+fizzy-mcp auth --mode local --token fz_xxx --no-configure
+```
+
+### `fizzy-mcp configure`
+
+Auto-configure AI agents without re-authenticating. Useful if you want to reconfigure agents or switch modes.
+
+```bash
+fizzy-mcp configure
+```
+
+This command:
+
+1. Reads your stored configuration
+2. Detects available AI agents (Claude Desktop, Cursor, OpenCode)
+3. Generates the appropriate config for your chosen mode
+4. Writes the configuration to each agent's config file
 
 ### `fizzy-mcp whoami`
 
@@ -86,29 +115,76 @@ Display your current Fizzy identity and accessible accounts.
 fizzy-mcp whoami
 ```
 
+**Output:**
+
+```
+Name: Ryan Yogan
+Email: ryan@example.com
+
+Accounts:
+  - Personal (/ryan) (active)
+  - Acme Corp (/acme)
+
+Mode: remote
+Hosted URL: https://fizzy-mcp-hosted.ryanyogan.workers.dev/mcp
+```
+
 ### `fizzy-mcp status`
 
-Check the server configuration status.
+Check the server configuration status, including mode, credentials, and agent configurations.
 
 ```bash
 fizzy-mcp status
 ```
 
+**Output:**
+
+```
+┌─ Fizzy MCP Status ─────────────────────────────────────┐
+│                                                        │
+│ Mode: Remote                                           │
+│ Hosted URL: https://fizzy-mcp-hosted.ryanyogan...      │
+│ API Key: fmcp_...abc (configured)                      │
+│ Token: fz_...xyz (valid)                               │
+│ Account: /ryan                                         │
+│                                                        │
+│ Configured Agents:                                     │
+│   - Claude Desktop                                     │
+│   - Cursor                                             │
+│   - OpenCode                                           │
+│                                                        │
+└────────────────────────────────────────────────────────┘
+```
+
 ### `fizzy-mcp logout`
 
-Clear stored credentials.
+Clear stored credentials and configuration.
 
 ```bash
 fizzy-mcp logout
 ```
 
+This removes:
+
+- Your stored access token
+- Account selection
+- Mode preference
+- API key (if configured)
+
+<Aside type="caution">
+  This does not remove configurations from your AI agents. You'll need to manually edit or remove
+  those if desired.
+</Aside>
+
 ### `fizzy-mcp` (no command)
 
-Start the MCP server. This is what AI agents call to connect.
+Start the MCP server in stdio mode. This is what AI agents call in **local mode**.
 
 ```bash
 fizzy-mcp
 ```
+
+You typically don't run this directly - your AI agent's MCP client spawns it automatically.
 
 ## Configuration File
 
@@ -118,9 +194,21 @@ Fizzy MCP stores configuration in `~/.config/fizzy-mcp/config.json`:
 {
   "accessToken": "fz_xxxxxxxxxxxxx",
   "accountSlug": "/your-organization",
-  "baseUrl": "https://app.fizzy.do"
+  "baseUrl": "https://app.fizzy.do",
+  "mode": "remote",
+  "hostedUrl": "https://fizzy-mcp-hosted.ryanyogan.workers.dev/mcp",
+  "hostedApiKey": "fmcp_xxxxxxxxxxxxx"
 }
 ```
+
+| Field          | Description                                  |
+| -------------- | -------------------------------------------- |
+| `accessToken`  | Your Fizzy Personal Access Token             |
+| `accountSlug`  | Selected account (e.g., `/my-org`)           |
+| `baseUrl`      | Fizzy API base URL (rarely changed)          |
+| `mode`         | Deployment mode: `remote` or `local`         |
+| `hostedUrl`    | Custom hosted service URL (for self-hosting) |
+| `hostedApiKey` | API key for higher rate limits               |
 
 <Aside type="caution">
   The config file is created with mode 600 (owner read/write only) to protect your access token.
@@ -130,14 +218,43 @@ Fizzy MCP stores configuration in `~/.config/fizzy-mcp/config.json`:
 
 You can also configure Fizzy MCP using environment variables:
 
-| Variable | Description |
-|----------|-------------|
-| `FIZZY_ACCESS_TOKEN` | Your Personal Access Token |
-| `FIZZY_ACCOUNT_SLUG` | Account slug (e.g., `/my-org`) |
-| `FIZZY_BASE_URL` | API base URL (default: `https://app.fizzy.do`) |
+| Variable             | Description                                    |
+| -------------------- | ---------------------------------------------- |
+| `FIZZY_ACCESS_TOKEN` | Your Personal Access Token                     |
+| `FIZZY_ACCOUNT_SLUG` | Account slug (e.g., `/my-org`)                 |
+| `FIZZY_BASE_URL`     | API base URL (default: `https://app.fizzy.do`) |
+| `FIZZY_MCP_MODE`     | Deployment mode: `remote` or `local`           |
+| `FIZZY_MCP_API_KEY`  | Hosted service API key                         |
+| `FIZZY_MCP_URL`      | Custom hosted service URL                      |
 
 Environment variables take precedence over the config file.
 
+## Deployment Modes
+
+### Remote Mode (Recommended)
+
+Uses the hosted MCP service at `https://fizzy-mcp-hosted.ryanyogan.workers.dev`. Best for:
+
+- Quick setup without running a local server
+- Remote MCP clients that support HTTP transport
+- Environments where local installation isn't practical
+- Always running the latest version
+
+**Rate Limits:**
+
+- Anonymous (no API key): 100 writes/day
+- With API key: 1,000 writes/day
+- Admins: Unlimited
+
+### Local Mode
+
+Run the MCP server locally via stdio transport. Best for:
+
+- Desktop AI assistants (Claude Desktop, Cursor, etc.)
+- Development and testing
+- Full control, no rate limits
+- Offline usage (once authenticated)
+
 ## Next Steps
 
-After installation, proceed to [Authentication](/getting-started/authentication/) to set up your access token.
+After installation, proceed to [Authentication](/getting-started/authentication/) to set up your access token and configure your AI agents.

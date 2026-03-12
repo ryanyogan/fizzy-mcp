@@ -1,0 +1,42 @@
+{
+  "name": "@fizzy-mcp/hosted",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Hosted MCP server for Fizzy at fizzy-mcp.yogan.dev",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "build": "wrangler deploy --dry-run --outdir=dist",
+    "deploy": "wrangler deploy",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "wrangler types && tsc --noEmit",
+    "clean": "rm -rf dist .turbo .wrangler",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "wrangler d1 migrations apply fizzy-mcp-db --remote",
+    "db:migrate:local": "wrangler d1 migrations apply fizzy-mcp-db --local",
+    "db:seed": "tsx src/cli/seed.ts",
+    "admin:promote": "tsx src/cli/promote-admin.ts",
+    "admin:demote": "tsx src/cli/demote-admin.ts",
+    "admin:list": "tsx src/cli/list-admins.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.11.0",
+    "agents": "^0.0.74",
+    "better-auth": "^1.5.5",
+    "drizzle-orm": "^0.41.0",
+    "hono": "^4.6.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@fizzy-mcp/client": "workspace:*",
+    "@fizzy-mcp/shared": "workspace:*",
+    "@fizzy-mcp/tools": "workspace:*",
+    "@cloudflare/workers-types": "^4.20241205.0",
+    "drizzle-kit": "^0.31.4",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0",
+    "wrangler": "^3.99.0"
+  }
+}

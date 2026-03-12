@@ -19,7 +19,7 @@ hero:
       variant: minimal
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { Card, CardGrid, Aside } from '@astrojs/starlight/components';
 
 ## What is Fizzy MCP?
 
@@ -37,14 +37,31 @@ With Fizzy MCP, your AI can:
   <Card title="40 MCP Tools" icon="rocket">
     Complete API coverage with tools for boards, cards, columns, comments, tags, and users.
   </Card>
-  <Card title="Auto-Configuration" icon="setting">
-    Automatically detect and configure Claude Desktop, Cursor, and OpenCode after authentication.
+  <Card title="Two Deployment Modes" icon="setting">
+    Choose **Remote** (hosted service) or **Local** (stdio) based on your needs.
   </Card>
-  <Card title="Type-Safe" icon="approve-check">
+  <Card title="Auto-Configuration" icon="approve-check">
+    Automatically detect and configure Claude Desktop, Cursor, and OpenCode.
+  </Card>
+  <Card title="Type-Safe" icon="document">
     Built with TypeScript and Zod for reliable, validated API interactions.
   </Card>
-  <Card title="Retry Logic" icon="random">
-    Automatic exponential backoff with jitter for resilient API calls.
+</CardGrid>
+
+## Deployment Modes
+
+Fizzy MCP offers two deployment modes to fit your workflow:
+
+<CardGrid>
+  <Card title="Remote Mode (Recommended)" icon="cloud">
+    Use our hosted service at `fizzy-mcp-hosted.ryanyogan.workers.dev`. No local server required -
+    just configure and go. **Best for:** Quick setup, remote MCP clients, environments where local
+    installation isn't practical. **Rate limits:** 100 writes/day (anonymous) or 1,000/day (with API
+    key)
+  </Card>
+  <Card title="Local Mode" icon="laptop">
+    Run the MCP server locally via stdio transport. Full control with no rate limits. **Best for:**
+    Desktop AI assistants, development, testing, and offline usage.
   </Card>
 </CardGrid>
 
@@ -55,17 +72,19 @@ npx fizzy-do-mcp auth
 ```
 
 This will:
-1. Prompt for your Fizzy Personal Access Token
-2. Validate the token with the Fizzy API
-3. Offer to auto-configure detected AI agents
+
+1. Ask you to choose **Remote** (recommended) or **Local** mode
+2. Open your browser to get a Fizzy Personal Access Token
+3. Optionally configure an API key for higher rate limits (remote mode)
+4. Auto-configure detected AI agents (Claude Desktop, Cursor, OpenCode)
 
 ## Supported AI Agents
 
-| Agent | Status | Configuration |
-|-------|--------|---------------|
-| Claude Desktop | Supported | [Setup Guide](/configuration/claude-desktop/) |
-| Cursor | Supported | [Setup Guide](/configuration/cursor/) |
-| OpenCode | Supported | [Setup Guide](/configuration/opencode/) |
+| Agent          | Status    | Local Mode                                    | Remote Mode                                   |
+| -------------- | --------- | --------------------------------------------- | --------------------------------------------- |
+| Claude Desktop | Supported | [Setup Guide](/configuration/claude-desktop/) | [Setup Guide](/configuration/claude-desktop/) |
+| Cursor         | Supported | [Setup Guide](/configuration/cursor/)         | [Setup Guide](/configuration/cursor/)         |
+| OpenCode       | Supported | [Setup Guide](/configuration/opencode/)       | [Setup Guide](/configuration/opencode/)       |
 
 ## Example Usage
 
@@ -81,27 +100,58 @@ Once configured, your AI assistant can interact with Fizzy naturally:
 
 ## Architecture
 
+### Remote Mode (Hosted Service)
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   AI Agent      │────▶│  Fizzy MCP      │────▶│   Fizzy API     │
+│ (Claude, etc.)  │◀────│  Hosted Service │◀────│ (app.fizzy.do)  │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+        │                       │
+        │                       │
+        ▼                       ▼
+   MCP over HTTP          Cloudflare Workers
+   (Streamable)           (D1 + KV)
+```
+
+### Local Mode (Stdio)
+
 ```
 ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │   AI Agent      │────▶│   Fizzy MCP     │────▶│   Fizzy API     │
-│ (Claude, etc.)  │◀────│    Server       │◀────│ (app.fizzy.do)  │
+│ (Claude, etc.)  │◀────│  Local Server   │◀────│ (app.fizzy.do)  │
 └─────────────────┘     └─────────────────┘     └─────────────────┘
         │                       │
         │                       │
         ▼                       ▼
    MCP Protocol          TypeScript Client
-   (JSON-RPC)            (Result types)
+   (JSON-RPC stdio)      (Result types)
 ```
+
+## Hosted Service
+
+The hosted service at `https://fizzy-mcp-hosted.ryanyogan.workers.dev` provides:
+
+- **Remote MCP Access** - Use Fizzy tools from any MCP client via HTTP
+- **Rate Limiting** - Tiered limits based on authentication
+- **Usage Tracking** - Monitor your API usage
+- **Zero Setup** - No local server required
+
+[Learn more about the hosted service →](/hosted/overview/)
 
 ## Next Steps
 
 <CardGrid>
   <Card title="Installation" icon="laptop">
-    Learn how to install and configure Fizzy MCP.
-    [Read the guide →](/getting-started/installation/)
+    Learn how to install and configure Fizzy MCP. [Read the guide →](/getting-started/installation/)
+  </Card>
+  <Card title="Hosted Service" icon="cloud">
+    Explore the hosted MCP service and API. [Learn more →](/hosted/overview/)
   </Card>
   <Card title="Tools Reference" icon="document">
-    Explore all 40 available MCP tools.
-    [Browse tools →](/tools/overview/)
+    Explore all 40 available MCP tools. [Browse tools →](/tools/overview/)
+  </Card>
+  <Card title="REST API" icon="open-book">
+    Access usage stats and admin endpoints. [View API docs →](/api/rest/overview/)
   </Card>
 </CardGrid>
