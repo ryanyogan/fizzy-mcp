@@ -1,5 +1,5 @@
 /**
- * @fizzy-mcp/tools
+ * @fizzy-do-mcp/tools
  *
  * MCP tool definitions for the Fizzy API.
  *
@@ -10,10 +10,10 @@
  * @example
  * ```typescript
  * import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
- * import { FizzyClient } from '@fizzy-mcp/client';
- * import { registerAllTools } from '@fizzy-mcp/tools';
+ * import { FizzyClient } from '@fizzy-do-mcp/client';
+ * import { registerAllTools } from '@fizzy-do-mcp/tools';
  *
- * const server = new McpServer({ name: 'fizzy-mcp', version: '1.0.0' });
+ * const server = new McpServer({ name: 'fizzy-do-mcp', version: '1.0.0' });
  * const client = new FizzyClient({ token: 'xxx', accountSlug: 'my-org' });
  *
  * registerAllTools(server, client);

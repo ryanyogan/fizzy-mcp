@@ -27,7 +27,7 @@ export const FizzyConfigSchema = z.object({
 export type FizzyConfig = z.infer<typeof FizzyConfigSchema>;
 
 /**
- * Configuration stored in the config file (~/.config/fizzy-mcp/config.json).
+ * Configuration stored in the config file (~/.config/fizzy-do-mcp/config.json).
  */
 export const StoredConfigSchema = z.object({
   /**
@@ -68,6 +68,14 @@ export const ENV_VARS = {
  * Configuration file paths.
  */
 export const CONFIG_PATHS = {
+  dir: '.config/fizzy-do-mcp',
+  file: 'config.json',
+} as const;
+
+/**
+ * Old configuration file paths (for migration from fizzy-mcp to fizzy-do-mcp).
+ */
+export const OLD_CONFIG_PATHS = {
   dir: '.config/fizzy-mcp',
   file: 'config.json',
 } as const;

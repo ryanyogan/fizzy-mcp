@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vite-plus/test';
 import { formatToolSuccess, formatToolError, wrapToolOperation } from './utils.js';
-import { FizzyApiError, FizzyNetworkError, FizzyAuthError } from '@fizzy-mcp/shared';
+import { FizzyApiError, FizzyNetworkError, FizzyAuthError } from '@fizzy-do-mcp/shared';
 
 describe('utils', () => {
   describe('formatToolSuccess', () => {

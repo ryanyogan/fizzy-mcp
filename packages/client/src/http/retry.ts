@@ -1,4 +1,4 @@
-import { FizzyApiError, FizzyRateLimitError, FizzyNetworkError } from '@fizzy-mcp/shared';
+import { FizzyApiError, FizzyRateLimitError, FizzyNetworkError } from '@fizzy-do-mcp/shared';
 
 /**
  * Configuration for retry behavior.

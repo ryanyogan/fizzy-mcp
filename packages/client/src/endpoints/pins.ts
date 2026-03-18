@@ -1,4 +1,4 @@
-import { type Result, type FizzyError, CardListSchema, type CardList } from '@fizzy-mcp/shared';
+import { type Result, type FizzyError, CardListSchema, type CardList } from '@fizzy-do-mcp/shared';
 import { GlobalEndpoint } from './base.js';
 import type { HttpClient } from '../http/types.js';
 

@@ -1,11 +1,11 @@
 /**
- * @fizzy-mcp/client
+ * @fizzy-do-mcp/client
  *
  * Type-safe HTTP client for the Fizzy API.
  *
  * @example
  * ```typescript
- * import { FizzyClient } from '@fizzy-mcp/client';
+ * import { FizzyClient } from '@fizzy-do-mcp/client';
  *
  * const client = new FizzyClient({
  *   accessToken: process.env.FIZZY_ACCESS_TOKEN!,
@@ -93,4 +93,4 @@ export type {
   ListCardsParams,
   CreateCommentInput,
   UpdateCommentInput,
-} from '@fizzy-mcp/shared';
+} from '@fizzy-do-mcp/shared';

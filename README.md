@@ -15,7 +15,7 @@
 <p align="center">
   <a href="https://fizzy.yogan.dev">Documentation</a> •
   <a href="https://fizzy.yogan.dev/getting-started/installation">Quick Start</a> •
-  <a href="https://github.com/ryanyogan/fizzy-mcp/issues">Issues</a>
+  <a href="https://github.com/ryanyogan/fizzy-do-mcp/issues">Issues</a>
 </p>
 
 ---
@@ -109,7 +109,7 @@ See the [Tools Reference](https://fizzy.yogan.dev/tools/overview) for complete d
 ## Architecture
 
 ```
-fizzy-mcp/
+fizzy-do-mcp/
 ├── packages/
 │   ├── shared/      # Types, schemas, Result type
 │   ├── client/      # Type-safe HTTP client for Fizzy API

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { FizzyClient } from '@fizzy-mcp/client';
+import type { FizzyClient } from '@fizzy-do-mcp/client';
 import { wrapToolOperation } from '../utils.js';
 
 /**

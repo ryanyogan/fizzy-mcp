@@ -1,5 +1,5 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { FizzyClient } from '@fizzy-mcp/client';
+import type { FizzyClient } from '@fizzy-do-mcp/client';
 import { registerIdentityTools } from './identity/index.js';
 import { registerBoardTools } from './boards/index.js';
 import { registerCardTools } from './cards/index.js';
@@ -28,10 +28,10 @@ import { registerUserTools } from './users/index.js';
  * @example
  * ```typescript
  * import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
- * import { FizzyClient } from '@fizzy-mcp/client';
- * import { registerAllTools } from '@fizzy-mcp/tools';
+ * import { FizzyClient } from '@fizzy-do-mcp/client';
+ * import { registerAllTools } from '@fizzy-do-mcp/tools';
  *
- * const server = new McpServer({ name: 'fizzy-mcp', version: '1.0.0' });
+ * const server = new McpServer({ name: 'fizzy-do-mcp', version: '1.0.0' });
  * const client = new FizzyClient({ token: 'xxx', accountSlug: 'my-org' });
  *
  * registerAllTools(server, client);

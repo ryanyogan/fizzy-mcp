@@ -44,7 +44,7 @@ healthRoutes.get('/info', (c) => {
         description: 'Account slug (optional, auto-detected if not provided)',
       },
     },
-    github: 'https://github.com/ryanyogan/fizzy-mcp',
+    github: 'https://github.com/ryanyogan/fizzy-do-mcp',
   });
 });
 

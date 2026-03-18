@@ -4,7 +4,7 @@ A hosted MCP (Model Context Protocol) server for Fizzy that runs on Cloudflare W
 
 ## Overview
 
-This service provides a remotely-hosted MCP endpoint at `https://fizzy-mcp-hosted.ryanyogan.workers.dev` that allows AI agents to interact with Fizzy without running a local MCP server.
+This service provides a remotely-hosted MCP endpoint at `https://mcp.fizzy.yogan.dev` that allows AI agents to interact with Fizzy without running a local MCP server.
 
 ### Features
 

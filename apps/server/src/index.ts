@@ -1,5 +1,5 @@
 /**
- * @fizzy-mcp/server
+ * @fizzy-do-mcp/server
  *
  * MCP server for integrating AI agents with Fizzy (Basecamp's task management tool).
  *
@@ -9,10 +9,10 @@
  * @example
  * ```bash
  * # Configure with access token
- * fizzy-mcp auth
+ * fizzy-do-mcp configure
  *
  * # Run the server
- * fizzy-mcp
+ * fizzy-do-mcp
  * ```
  *
  * @packageDocumentation
@@ -20,8 +20,8 @@
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { FizzyClient } from '@fizzy-mcp/client';
-import { registerAllTools } from '@fizzy-mcp/tools';
+import { FizzyClient } from '@fizzy-do-mcp/client';
+import { registerAllTools } from '@fizzy-do-mcp/tools';
 import { resolveConfig, isConfigured } from './credentials.js';
 
 const VERSION = '0.1.0';
@@ -34,7 +34,7 @@ async function createServer(): Promise<McpServer> {
   if (!isConfigured()) {
     console.error('Error: Fizzy MCP server is not configured.');
     console.error('');
-    console.error('Run "fizzy-mcp auth" to configure your access token.');
+    console.error('Run "fizzy-do-mcp configure" to configure your access token.');
     console.error('');
     console.error('Or set the FIZZY_ACCESS_TOKEN environment variable.');
     process.exit(1);
@@ -45,13 +45,13 @@ async function createServer(): Promise<McpServer> {
   if (!config) {
     console.error('Error: Invalid configuration.');
     console.error('');
-    console.error('Run "fizzy-mcp auth" to reconfigure.');
+    console.error('Run "fizzy-do-mcp configure" to reconfigure.');
     process.exit(1);
   }
 
   // Create server
   const server = new McpServer({
-    name: 'fizzy-mcp',
+    name: 'fizzy-do-mcp',
     version: VERSION,
   });
 

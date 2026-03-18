@@ -7,7 +7,7 @@ import {
   type BoardList,
   type CreateBoardInput,
   type UpdateBoardInput,
-} from '@fizzy-mcp/shared';
+} from '@fizzy-do-mcp/shared';
 import { BaseEndpoint } from './base.js';
 
 /**

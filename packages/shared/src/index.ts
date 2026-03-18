@@ -1,5 +1,5 @@
 /**
- * @fizzy-mcp/shared
+ * @fizzy-do-mcp/shared
  *
  * Shared types, schemas, and utilities for the Fizzy MCP server.
  *
@@ -44,6 +44,7 @@ export {
   DEFAULT_CONFIG,
   ENV_VARS,
   CONFIG_PATHS,
+  OLD_CONFIG_PATHS,
   HOSTED_URLS,
   FIZZY_TOKEN_URL,
   type FizzyConfig,

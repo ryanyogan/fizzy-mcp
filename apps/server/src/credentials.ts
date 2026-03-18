@@ -9,7 +9,8 @@ import {
   DEFAULT_CONFIG,
   ENV_VARS,
   CONFIG_PATHS,
-} from '@fizzy-mcp/shared';
+  OLD_CONFIG_PATHS,
+} from '@fizzy-do-mcp/shared';
 
 /**
  * Gets the full path to the config directory.
@@ -19,10 +20,24 @@ export function getConfigDir(): string {
 }
 
 /**
+ * Gets the full path to the old config directory (for migration).
+ */
+export function getOldConfigDir(): string {
+  return path.join(os.homedir(), OLD_CONFIG_PATHS.dir);
+}
+
+/**
  * Gets the full path to the config file.
  */
 export function getConfigPath(): string {
   return path.join(getConfigDir(), CONFIG_PATHS.file);
+}
+
+/**
+ * Gets the full path to the old config file (for migration).
+ */
+export function getOldConfigPath(): string {
+  return path.join(getOldConfigDir(), OLD_CONFIG_PATHS.file);
 }
 
 /**
@@ -36,10 +51,42 @@ export function ensureConfigDir(): void {
 }
 
 /**
+ * Migrates config from old path (~/.config/fizzy-mcp) to new path (~/.config/fizzy-do-mcp).
+ * This is called automatically when reading config.
+ *
+ * @returns true if migration was performed
+ */
+export function migrateConfigIfNeeded(): boolean {
+  const oldPath = getOldConfigPath();
+  const newPath = getConfigPath();
+
+  // Only migrate if old config exists and new config doesn't
+  if (fs.existsSync(oldPath) && !fs.existsSync(newPath)) {
+    try {
+      ensureConfigDir();
+      fs.copyFileSync(oldPath, newPath);
+      // Set secure permissions on the new file
+      fs.chmodSync(newPath, 0o600);
+      console.error('Migrated config from ~/.config/fizzy-mcp to ~/.config/fizzy-do-mcp');
+      return true;
+    } catch (error) {
+      console.error(`Warning: Could not migrate config: ${String(error)}`);
+      return false;
+    }
+  }
+
+  return false;
+}
+
+/**
  * Reads the stored config from the config file.
  * Returns empty object if file doesn't exist.
+ * Automatically migrates from old config path if needed.
  */
 export function readStoredConfig(): StoredConfig {
+  // Try to migrate from old path first
+  migrateConfigIfNeeded();
+
   const configPath = getConfigPath();
 
   if (!fs.existsSync(configPath)) {

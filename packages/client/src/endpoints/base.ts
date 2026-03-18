@@ -1,4 +1,4 @@
-import { Result, Ok, Err, FizzyError, toFizzyError } from '@fizzy-mcp/shared';
+import { Result, Ok, Err, FizzyError, toFizzyError } from '@fizzy-do-mcp/shared';
 import type { HttpClient } from '../http/types.js';
 import type { ZodType } from 'zod';
 

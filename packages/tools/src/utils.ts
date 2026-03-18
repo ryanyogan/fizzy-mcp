@@ -1,4 +1,4 @@
-import { FizzyError } from '@fizzy-mcp/shared';
+import { FizzyError } from '@fizzy-do-mcp/shared';
 
 /**
  * Content type for MCP tool responses.

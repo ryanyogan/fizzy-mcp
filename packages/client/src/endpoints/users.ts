@@ -5,7 +5,7 @@ import {
   UserListSchema,
   type User,
   type UserList,
-} from '@fizzy-mcp/shared';
+} from '@fizzy-do-mcp/shared';
 import { BaseEndpoint } from './base.js';
 
 /**

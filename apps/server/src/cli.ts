@@ -11,8 +11,8 @@
 import { Command } from 'commander';
 import * as readline from 'node:readline';
 import { exec } from 'node:child_process';
-import { FizzyClient } from '@fizzy-mcp/client';
-import { FIZZY_TOKEN_URL } from '@fizzy-mcp/shared';
+import { FizzyClient } from '@fizzy-do-mcp/client';
+import { FIZZY_TOKEN_URL } from '@fizzy-do-mcp/shared';
 import {
   resolveConfig,
   saveConfig,
@@ -30,7 +30,8 @@ const VERSION = '0.2.0';
 const program = new Command();
 
 program
-  .name('fizzy-mcp')
+  .name('fizzy-do-mcp')
+  .alias('fdm')
   .description('MCP server for Fizzy - AI-powered task management')
   .version(VERSION);
 
@@ -283,14 +284,14 @@ program
   .action(async () => {
     if (!isConfigured()) {
       showFailure('Not authenticated');
-      console.error(colors.muted('Run "fizzy-mcp configure" first.'));
+      console.error(colors.muted('Run "fizzy-do-mcp configure" first.'));
       process.exit(1);
     }
 
     const config = resolveConfig();
     if (!config) {
       showFailure('Invalid configuration');
-      console.error(colors.muted('Run "fizzy-mcp configure" to reconfigure.'));
+      console.error(colors.muted('Run "fizzy-do-mcp configure" to reconfigure.'));
       process.exit(1);
     }
 
@@ -349,7 +350,7 @@ program
       const status = [
         keyValue('Status', colors.warning('Not configured')),
         '',
-        colors.muted('Run "fizzy-mcp configure" to set up authentication.'),
+        colors.muted('Run "fizzy-do-mcp configure" to set up authentication.'),
       ].join('\n');
 
       console.error(box(status, { title: 'Server Status', borderColor: '#fbbf24' }));
@@ -362,7 +363,7 @@ program
       const status = [
         keyValue('Status', colors.error('Invalid configuration')),
         '',
-        colors.muted('Run "fizzy-mcp configure" to reconfigure.'),
+        colors.muted('Run "fizzy-do-mcp configure" to reconfigure.'),
       ].join('\n');
 
       console.error(box(status, { title: 'Server Status', borderColor: '#f87171' }));

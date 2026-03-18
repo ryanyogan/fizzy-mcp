@@ -1,6 +1,6 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { FizzyClient } from '@fizzy-mcp/client';
-import { registerAllTools } from '@fizzy-mcp/tools';
+import { FizzyClient } from '@fizzy-do-mcp/client';
+import { registerAllTools } from '@fizzy-do-mcp/tools';
 
 /**
  * Server metadata

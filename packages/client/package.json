@@ -1,5 +1,5 @@
 {
-  "name": "@fizzy-mcp/client",
+  "name": "@fizzy-do-mcp/client",
   "version": "0.1.0",
   "description": "Type-safe HTTP client for the Fizzy API",
   "type": "module",
@@ -24,7 +24,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@fizzy-mcp/shared": "workspace:*",
+    "@fizzy-do-mcp/shared": "workspace:*",
     "zod": "^3.24.0"
   },
   "devDependencies": {

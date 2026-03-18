@@ -5,7 +5,7 @@ import {
   AccountSettingsSchema,
   type IdentityResponse,
   type AccountSettings,
-} from '@fizzy-mcp/shared';
+} from '@fizzy-do-mcp/shared';
 import { GlobalEndpoint, BaseEndpoint, type EndpointContext } from './base.js';
 import type { HttpClient } from '../http/types.js';
 

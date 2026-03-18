@@ -55,6 +55,11 @@
 
 /* Light mode */
 :root:not(.dark) {
+  /* Darker cyan for better readability on white */
+  --vp-c-brand-1: #0891b2; /* Cyan 600 - primary */
+  --vp-c-brand-2: #06b6d4; /* Cyan 500 - hover */
+  --vp-c-brand-3: #0e7490; /* Cyan 700 - active */
+
   --vp-c-bg: #ffffff;
   --vp-c-bg-soft: #f5f5f5;
   --vp-c-bg-mute: #e5e5e5;

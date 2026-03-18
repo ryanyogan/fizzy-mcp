@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite-plus';
 
 // Bundle workspace packages so they don't need to be published separately
-const noExternal = ['@fizzy-mcp/shared', '@fizzy-mcp/client', '@fizzy-mcp/tools'];
+const noExternal = ['@fizzy-do-mcp/shared', '@fizzy-do-mcp/client', '@fizzy-do-mcp/tools'];
 
 export default defineConfig({
   pack: [

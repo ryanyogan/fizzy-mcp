@@ -1,4 +1,4 @@
-import { type Result, type FizzyError, TagListSchema, type TagList } from '@fizzy-mcp/shared';
+import { type Result, type FizzyError, TagListSchema, type TagList } from '@fizzy-do-mcp/shared';
 import { BaseEndpoint } from './base.js';
 
 /**

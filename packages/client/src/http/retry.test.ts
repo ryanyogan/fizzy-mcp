@@ -5,7 +5,7 @@ import {
   FizzyNetworkError,
   FizzyRateLimitError,
   FizzyAuthError,
-} from '@fizzy-mcp/shared';
+} from '@fizzy-do-mcp/shared';
 
 describe('withRetry', () => {
   beforeEach(() => {

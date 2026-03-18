@@ -1,5 +1,5 @@
 {
-  "name": "fizzy-mcp",
+  "name": "fizzy-do-mcp",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@9.15.0",
@@ -19,10 +19,10 @@
     "docs:dev": "vp run -r --filter docs dev",
     "docs:build": "vp run -r --filter docs build",
     "docs:deploy": "vp run -r --filter docs deploy",
-    "hosted:dev": "vp run -r --filter @fizzy-mcp/hosted dev",
-    "hosted:build": "vp run -r --filter @fizzy-mcp/hosted build",
-    "hosted:deploy": "vp run -r --filter @fizzy-mcp/hosted deploy",
-    "hosted:typecheck": "vp run -r --filter @fizzy-mcp/hosted typecheck"
+    "hosted:dev": "vp run -r --filter @fizzy-do-mcp/hosted dev",
+    "hosted:build": "vp run -r --filter @fizzy-do-mcp/hosted build",
+    "hosted:deploy": "vp run -r --filter @fizzy-do-mcp/hosted deploy",
+    "hosted:typecheck": "vp run -r --filter @fizzy-do-mcp/hosted typecheck"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

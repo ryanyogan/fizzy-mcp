@@ -1,5 +1,5 @@
 {
-  "name": "@fizzy-mcp/hosted",
+  "name": "@fizzy-do-mcp/hosted",
   "version": "0.2.0",
   "private": true,
   "description": "Hosted MCP server for Fizzy - open source, no auth required",
@@ -19,9 +19,9 @@
     "zod": "^3.24.0"
   },
   "devDependencies": {
-    "@fizzy-mcp/client": "workspace:*",
-    "@fizzy-mcp/shared": "workspace:*",
-    "@fizzy-mcp/tools": "workspace:*",
+    "@fizzy-do-mcp/client": "workspace:*",
+    "@fizzy-do-mcp/shared": "workspace:*",
+    "@fizzy-do-mcp/tools": "workspace:*",
     "@cloudflare/workers-types": "^4.20241205.0",
     "typescript": "^5.7.0",
     "vite-plus": "catalog:",

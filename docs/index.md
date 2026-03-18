@@ -14,7 +14,7 @@ hero:
       link: /getting-started/introduction
     - theme: alt
       text: View on GitHub
-      link: https://github.com/ryanyogan/fizzy-mcp
+      link: https://github.com/ryanyogan/fizzy-do-mcp
 
 features:
   - icon: "01"

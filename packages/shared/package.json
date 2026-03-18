@@ -1,5 +1,5 @@
 {
-  "name": "@fizzy-mcp/shared",
+  "name": "@fizzy-do-mcp/shared",
   "version": "0.1.0",
   "description": "Shared types, schemas, and utilities for Fizzy MCP",
   "type": "module",

@@ -50,7 +50,7 @@ export function createApp() {
         health: '/health',
         docs: 'https://fizzy.yogan.dev',
       },
-      github: 'https://github.com/ryanyogan/fizzy-mcp',
+      github: 'https://github.com/ryanyogan/fizzy-do-mcp',
     });
   });
 

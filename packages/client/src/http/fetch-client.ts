@@ -7,7 +7,7 @@ import {
   FizzyRateLimitError,
   FizzyValidationError,
   type ValidationIssue,
-} from '@fizzy-mcp/shared';
+} from '@fizzy-do-mcp/shared';
 import type { HttpClient, HttpClientConfig, HttpRequestConfig, HttpResponse } from './types.js';
 import { withRetry, type RetryConfig } from './retry.js';
 

@@ -26,7 +26,7 @@ export default defineConfig({
       { text: 'Docs', link: '/getting-started/introduction' },
       { text: 'Tools', link: '/tools/overview' },
       { text: 'Workflows', link: '/workflows/ai-driven-tasks' },
-      { text: 'GitHub', link: 'https://github.com/ryanyogan/fizzy-mcp' },
+      { text: 'GitHub', link: 'https://github.com/ryanyogan/fizzy-do-mcp' },
     ],
 
     sidebar: [
@@ -82,6 +82,8 @@ export default defineConfig({
               { text: 'fizzy_create_board', link: '/tools/boards/create-board' },
               { text: 'fizzy_update_board', link: '/tools/boards/update-board' },
               { text: 'fizzy_delete_board', link: '/tools/boards/delete-board' },
+              { text: 'fizzy_publish_board', link: '/tools/boards/publish-board' },
+              { text: 'fizzy_unpublish_board', link: '/tools/boards/unpublish-board' },
             ],
           },
           {
@@ -97,6 +99,15 @@ export default defineConfig({
               { text: 'fizzy_reopen_card', link: '/tools/cards/reopen-card' },
               { text: 'fizzy_postpone_card', link: '/tools/cards/postpone-card' },
               { text: 'fizzy_triage_card', link: '/tools/cards/triage-card' },
+              { text: 'fizzy_untriage_card', link: '/tools/cards/untriage-card' },
+              { text: 'fizzy_tag_card', link: '/tools/cards/tag-card' },
+              { text: 'fizzy_assign_card', link: '/tools/cards/assign-card' },
+              { text: 'fizzy_watch_card', link: '/tools/cards/watch-card' },
+              { text: 'fizzy_unwatch_card', link: '/tools/cards/unwatch-card' },
+              { text: 'fizzy_pin_card', link: '/tools/cards/pin-card' },
+              { text: 'fizzy_unpin_card', link: '/tools/cards/unpin-card' },
+              { text: 'fizzy_mark_golden', link: '/tools/cards/mark-golden' },
+              { text: 'fizzy_unmark_golden', link: '/tools/cards/unmark-golden' },
             ],
           },
           {
@@ -104,6 +115,7 @@ export default defineConfig({
             collapsed: true,
             items: [
               { text: 'fizzy_list_comments', link: '/tools/comments/list-comments' },
+              { text: 'fizzy_get_comment', link: '/tools/comments/get-comment' },
               { text: 'fizzy_create_comment', link: '/tools/comments/create-comment' },
               { text: 'fizzy_update_comment', link: '/tools/comments/update-comment' },
               { text: 'fizzy_delete_comment', link: '/tools/comments/delete-comment' },
@@ -114,15 +126,23 @@ export default defineConfig({
             collapsed: true,
             items: [
               { text: 'fizzy_list_columns', link: '/tools/columns/list-columns' },
+              { text: 'fizzy_get_column', link: '/tools/columns/get-column' },
               { text: 'fizzy_create_column', link: '/tools/columns/create-column' },
+              { text: 'fizzy_update_column', link: '/tools/columns/update-column' },
+              { text: 'fizzy_delete_column', link: '/tools/columns/delete-column' },
             ],
           },
           {
-            text: 'Tags & Users',
+            text: 'Tags',
+            collapsed: true,
+            items: [{ text: 'fizzy_list_tags', link: '/tools/tags/list-tags' }],
+          },
+          {
+            text: 'Users',
             collapsed: true,
             items: [
-              { text: 'fizzy_list_tags', link: '/tools/tags/list-tags' },
               { text: 'fizzy_list_users', link: '/tools/users/list-users' },
+              { text: 'fizzy_get_user', link: '/tools/users/get-user' },
             ],
           },
         ],
@@ -134,11 +154,12 @@ export default defineConfig({
           { text: 'TypeScript Client', link: '/api/client' },
           { text: 'Error Handling', link: '/api/errors' },
           { text: 'Result Type', link: '/api/result' },
+          { text: 'CLI Reference', link: '/api/cli' },
         ],
       },
     ],
 
-    socialLinks: [{ icon: 'github', link: 'https://github.com/ryanyogan/fizzy-mcp' }],
+    socialLinks: [{ icon: 'github', link: 'https://github.com/ryanyogan/fizzy-do-mcp' }],
 
     search: {
       provider: 'local',
@@ -148,7 +169,7 @@ export default defineConfig({
     },
 
     editLink: {
-      pattern: 'https://github.com/ryanyogan/fizzy-mcp/edit/main/docs/:path',
+      pattern: 'https://github.com/ryanyogan/fizzy-do-mcp/edit/main/docs/:path',
       text: 'Edit this page on GitHub',
     },
 

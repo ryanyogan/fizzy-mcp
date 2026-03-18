@@ -128,7 +128,7 @@ export async function runConfigureFlow(): Promise<boolean> {
   if (!configOptions) {
     console.error('');
     showWarning('No credentials found');
-    console.error(colors.muted('Run "fizzy-mcp configure" first to set up authentication.'));
+    console.error(colors.muted('Run "fizzy-do-mcp configure" first to set up authentication.'));
     return false;
   }
 
@@ -168,7 +168,7 @@ export async function runConfigureFlow(): Promise<boolean> {
   if (!shouldConfigure) {
     console.error('');
     showInfo('Skipping agent configuration');
-    console.error(colors.muted('You can run "fizzy-mcp configure" later to set up agents.'));
+    console.error(colors.muted('You can run "fizzy-do-mcp configure" later to set up agents.'));
     return false;
   }
 

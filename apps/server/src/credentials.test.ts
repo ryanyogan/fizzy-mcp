@@ -18,8 +18,8 @@ vi.mock('node:os');
 
 describe('credentials', () => {
   const mockHome = '/home/testuser';
-  const mockConfigDir = '/home/testuser/.config/fizzy-mcp';
-  const mockConfigPath = '/home/testuser/.config/fizzy-mcp/config.json';
+  const mockConfigDir = '/home/testuser/.config/fizzy-do-mcp';
+  const mockConfigPath = '/home/testuser/.config/fizzy-do-mcp/config.json';
 
   beforeEach(() => {
     vi.clearAllMocks();

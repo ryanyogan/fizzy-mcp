@@ -1,4 +1,4 @@
-import { DEFAULT_CONFIG } from '@fizzy-mcp/shared';
+import { DEFAULT_CONFIG } from '@fizzy-do-mcp/shared';
 import { FetchHttpClient, type HttpClient, type RetryConfig } from './http/index.js';
 import {
   IdentityEndpoint,

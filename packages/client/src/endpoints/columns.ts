@@ -7,7 +7,7 @@ import {
   type ColumnList,
   type CreateColumnInput,
   type UpdateColumnInput,
-} from '@fizzy-mcp/shared';
+} from '@fizzy-do-mcp/shared';
 import { BaseEndpoint } from './base.js';
 
 /**

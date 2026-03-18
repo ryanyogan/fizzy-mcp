@@ -7,7 +7,7 @@ import {
   type CommentList,
   type CreateCommentInput,
   type UpdateCommentInput,
-} from '@fizzy-mcp/shared';
+} from '@fizzy-do-mcp/shared';
 import { BaseEndpoint } from './base.js';
 
 /**

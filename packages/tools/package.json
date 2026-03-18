@@ -1,5 +1,5 @@
 {
-  "name": "@fizzy-mcp/tools",
+  "name": "@fizzy-do-mcp/tools",
   "version": "0.1.0",
   "description": "MCP tool definitions for Fizzy",
   "type": "module",
@@ -24,8 +24,8 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@fizzy-mcp/client": "workspace:*",
-    "@fizzy-mcp/shared": "workspace:*",
+    "@fizzy-do-mcp/client": "workspace:*",
+    "@fizzy-do-mcp/shared": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.11.0",
     "zod": "^3.24.0"
   },
