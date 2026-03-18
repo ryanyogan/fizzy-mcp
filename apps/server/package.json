@@ -1,6 +1,6 @@
 {
   "name": "fizzy-do-mcp",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "MCP server for integrating AI agents with Fizzy, Basecamp's task management tool",
   "author": "Ryan Yogan <ryan@yogan.dev>",
   "license": "MIT",
@@ -34,13 +34,13 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch",
+    "build": "vp pack",
+    "dev": "vp pack --watch",
     "start": "node dist/index.js",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "vp test",
+    "test:watch": "vp test --watch",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist .turbo",
+    "clean": "rm -rf dist",
     "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
@@ -49,6 +49,7 @@
     "chalk": "^5.6.2",
     "commander": "^12.1.0",
     "figlet": "^1.11.0",
+    "gradient-string": "^3.0.0",
     "ora": "^9.3.0",
     "zod": "^3.24.0"
   },
@@ -57,10 +58,10 @@
     "@fizzy-mcp/shared": "workspace:*",
     "@fizzy-mcp/tools": "workspace:*",
     "@types/figlet": "^1.7.0",
+    "@types/gradient-string": "^1.1.6",
     "@types/node": "^22.10.0",
-    "tsup": "^8.3.0",
     "typescript": "^5.7.0",
-    "vitest": "^2.1.0"
+    "vite-plus": "catalog:"
   },
   "keywords": [
     "mcp",

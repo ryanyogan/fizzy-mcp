@@ -1,6 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vite-plus/test';
 import * as fs from 'node:fs';
-import * as path from 'node:path';
 import * as os from 'node:os';
 import {
   getConfigDir,
@@ -133,11 +132,9 @@ describe('credentials', () => {
 
       saveConfig({ accessToken: 'test-token' });
 
-      expect(fs.writeFileSync).toHaveBeenCalledWith(
-        mockConfigPath,
-        expect.any(String),
-        { mode: 0o600 },
-      );
+      expect(fs.writeFileSync).toHaveBeenCalledWith(mockConfigPath, expect.any(String), {
+        mode: 0o600,
+      });
     });
   });
 
@@ -218,9 +215,7 @@ describe('credentials', () => {
 
     it('returns true if stored config has token', () => {
       vi.mocked(fs.existsSync).mockReturnValue(true);
-      vi.mocked(fs.readFileSync).mockReturnValue(
-        JSON.stringify({ accessToken: 'stored-token' }),
-      );
+      vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify({ accessToken: 'stored-token' }));
 
       expect(isConfigured()).toBe(true);
     });

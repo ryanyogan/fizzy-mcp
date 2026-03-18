@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'vite-plus/test';
 import {
   Ok,
   Err,
@@ -19,18 +19,21 @@ describe('Result', () => {
     it('creates a successful result', () => {
       const result = Ok(42);
       expect(result.ok).toBe(true);
-      expect(result.value).toBe(42);
+      expect((result as { ok: true; value: number }).value).toBe(42);
     });
 
     it('works with complex types', () => {
       const result = Ok({ name: 'test', value: [1, 2, 3] });
       expect(result.ok).toBe(true);
-      expect(result.value).toEqual({ name: 'test', value: [1, 2, 3] });
+      expect((result as { ok: true; value: { name: string; value: number[] } }).value).toEqual({
+        name: 'test',
+        value: [1, 2, 3],
+      });
     });
 
     it('works with null and undefined', () => {
-      expect(Ok(null).value).toBe(null);
-      expect(Ok(undefined).value).toBe(undefined);
+      expect((Ok(null) as { ok: true; value: null }).value).toBe(null);
+      expect((Ok(undefined) as { ok: true; value: undefined }).value).toBe(undefined);
     });
   });
 
@@ -39,13 +42,16 @@ describe('Result', () => {
       const error = new Error('test error');
       const result = Err(error);
       expect(result.ok).toBe(false);
-      expect(result.error).toBe(error);
+      expect((result as { ok: false; error: Error }).error).toBe(error);
     });
 
     it('works with custom error types', () => {
       const result = Err({ code: 'NOT_FOUND', message: 'Resource not found' });
       expect(result.ok).toBe(false);
-      expect(result.error).toEqual({ code: 'NOT_FOUND', message: 'Resource not found' });
+      expect((result as { ok: false; error: { code: string; message: string } }).error).toEqual({
+        code: 'NOT_FOUND',
+        message: 'Resource not found',
+      });
     });
   });
 
@@ -178,7 +184,7 @@ describe('Result', () => {
     it('uses custom error mapper', async () => {
       const result = await fromPromise(
         Promise.reject('string error'),
-        (e) => new Error(`Mapped: ${e}`),
+        (e) => new Error(`Mapped: ${String(e)}`),
       );
       expect(result.ok).toBe(false);
       expect((result as { ok: false; error: Error }).error.message).toBe('Mapped: string error');
@@ -206,7 +212,7 @@ describe('Result', () => {
         () => {
           throw 'string error';
         },
-        (e) => new Error(`Mapped: ${e}`),
+        (e) => new Error(`Mapped: ${String(e)}`),
       );
       expect(result.ok).toBe(false);
       expect((result as { ok: false; error: Error }).error.message).toBe('Mapped: string error');

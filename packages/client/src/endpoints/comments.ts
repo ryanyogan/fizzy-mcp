@@ -71,7 +71,10 @@ export class CommentsEndpoint extends BaseEndpoint {
    * }
    * ```
    */
-  async create(cardNumber: number, input: CreateCommentInput): Promise<Result<Comment, FizzyError>> {
+  async create(
+    cardNumber: number,
+    input: CreateCommentInput,
+  ): Promise<Result<Comment, FizzyError>> {
     return this.post(`/cards/${cardNumber}/comments`, CommentSchema, { comment: input });
   }
 

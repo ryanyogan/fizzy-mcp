@@ -1,14 +1,13 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { FizzyClient } from '@fizzy-mcp/client';
 import { registerAllTools } from '@fizzy-mcp/tools';
-import type { SessionContext } from '../types';
 
 /**
  * Server metadata
  */
 export const SERVER_INFO = {
-  name: 'Fizzy MCP (Hosted)',
-  version: '0.1.0',
+  name: 'Fizzy MCP',
+  version: '0.2.0',
 } as const;
 
 /**
@@ -36,26 +35,4 @@ export function createFizzyMcpServer(
   registerAllTools(server, client);
 
   return server;
-}
-
-/**
- * Get the appropriate daily limit based on user tier
- */
-export function getTierLimit(
-  tier: SessionContext['tier'],
-  settings: {
-    anonymous_daily_limit: number;
-    authenticated_daily_limit: number;
-    admin_daily_limit: number;
-  },
-): number {
-  switch (tier) {
-    case 'admin':
-      return settings.admin_daily_limit; // -1 = unlimited
-    case 'authenticated':
-      return settings.authenticated_daily_limit;
-    case 'anonymous':
-    default:
-      return settings.anonymous_daily_limit;
-  }
 }

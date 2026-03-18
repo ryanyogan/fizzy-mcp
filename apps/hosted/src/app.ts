@@ -4,12 +4,14 @@ import { secureHeaders } from 'hono/secure-headers';
 import type { HonoEnv } from './types';
 import { apiRoutes } from './api';
 import { mcpRoutes } from './mcp/handler';
-import { sessionMiddleware } from './middleware/session';
 import { fizzyTokenMiddleware } from './middleware/fizzy-token';
 import { loggingMiddleware, errorLoggingMiddleware } from './middleware/logging';
 
 /**
  * Create the Hono application
+ *
+ * Simplified version - no auth, no rate limiting
+ * Just proxies MCP requests to Fizzy API using user's token
  */
 export function createApp() {
   const app = new Hono<HonoEnv>();
@@ -21,36 +23,34 @@ export function createApp() {
   app.use(
     '*',
     cors({
-      origin: ['https://fizzy-mcp.yogan.dev', 'https://fizzy.yogan.dev'],
+      origin: '*', // Allow all origins for open source
       allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowHeaders: ['Content-Type', 'X-Fizzy-Token', 'X-API-Key', 'X-Fizzy-Account-Slug'],
-      exposeHeaders: [
-        'X-RateLimit-Limit',
-        'X-RateLimit-Remaining',
-        'X-RateLimit-Reset',
-        'X-User-Tier',
-        'X-Request-Id',
-      ],
-      credentials: true,
+      allowHeaders: ['Content-Type', 'X-Fizzy-Token', 'X-Fizzy-Account-Slug'],
+      exposeHeaders: ['X-Request-Id'],
+      credentials: false,
       maxAge: 86400,
     }),
   );
 
-  // Session and token extraction (applied to all routes)
-  app.use('*', sessionMiddleware);
+  // Request ID and Fizzy token extraction
+  app.use('*', async (c, next) => {
+    c.set('requestId', crypto.randomUUID());
+    await next();
+  });
   app.use('*', fizzyTokenMiddleware);
 
   // Root endpoint
   app.get('/', (c) => {
     return c.json({
-      name: 'Fizzy MCP Hosted Service',
-      version: '0.1.0',
+      name: 'Fizzy MCP',
+      version: '0.2.0',
+      description: 'Open source MCP server for Fizzy task management',
       endpoints: {
         mcp: '/mcp',
-        api: '/api',
-        health: '/api/health',
+        health: '/health',
         docs: 'https://fizzy.yogan.dev',
       },
+      github: 'https://github.com/ryanyogan/fizzy-mcp',
     });
   });
 

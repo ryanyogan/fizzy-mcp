@@ -52,7 +52,7 @@ export function readStoredConfig(): StoredConfig {
     return StoredConfigSchema.parse(data);
   } catch (error) {
     // Return empty config on parse errors - will prompt for re-auth
-    console.error(`Warning: Could not read config file: ${error}`);
+    console.error(`Warning: Could not read config file: ${String(error)}`);
     return {};
   }
 }

@@ -120,7 +120,7 @@ async function main(): Promise<void> {
 }
 
 // Run when executed directly
-main();
+void main();
 
 // Export for programmatic use
 export { createServer };

@@ -102,19 +102,12 @@ function getServerConfigOptions(): ServerConfigOptions | null {
   }
 
   const options: ServerConfigOptions = {
-    mode: stored.mode || 'remote',
     accessToken: stored.accessToken,
   };
 
   // Only include optional properties if they have values
   if (stored.accountSlug) {
     options.accountSlug = stored.accountSlug;
-  }
-  if (stored.hostedApiKey) {
-    options.hostedApiKey = stored.hostedApiKey;
-  }
-  if (stored.hostedUrl) {
-    options.hostedUrl = stored.hostedUrl;
   }
 
   return options;
@@ -135,7 +128,7 @@ export async function runConfigureFlow(): Promise<boolean> {
   if (!configOptions) {
     console.error('');
     showWarning('No credentials found');
-    console.error(colors.muted('Run "fizzy-mcp auth" first to set up authentication.'));
+    console.error(colors.muted('Run "fizzy-mcp configure" first to set up authentication.'));
     return false;
   }
 
@@ -163,13 +156,6 @@ export async function runConfigureFlow(): Promise<boolean> {
     .join('\n');
 
   console.error(box(agentList, { title: 'Detected AI Agents' }));
-
-  // Show mode info
-  const modeInfo =
-    configOptions.mode === 'remote'
-      ? colors.muted('Mode: Remote (hosted service)')
-      : colors.muted('Mode: Local (stdio)');
-  console.error(modeInfo);
 
   // Ask if user wants to configure
   const configureAll = unconfiguredAgents.length === availableAgents.length;
@@ -222,13 +208,6 @@ export async function runConfigureFlow(): Promise<boolean> {
       '',
       colors.muted('Restart your AI agents to start using Fizzy.'),
     ];
-
-    if (configOptions.mode === 'remote') {
-      successMessage.push('');
-      successMessage.push(
-        colors.warning('Note: Your Fizzy token is stored in the agent config files.'),
-      );
-    }
 
     console.error(box(successMessage.join('\n'), { borderColor: '#4ade80' }));
   }

@@ -55,7 +55,9 @@ export function registerCardTools(server: McpServer, client: FizzyClient): void 
       description: z
         .string()
         .optional()
-        .describe('Card description. Supports markdown (bold, italic, links, lists, code) or HTML.'),
+        .describe(
+          'Card description. Supports markdown (bold, italic, links, lists, code) or HTML.',
+        ),
       status: z
         .enum(['drafted', 'published'])
         .optional()
@@ -266,10 +268,7 @@ export function registerCardTools(server: McpServer, client: FizzyClient): void 
       card_number: z.number().describe('The card number to pin'),
     },
     async ({ card_number }) => {
-      return wrapToolOperation(
-        () => client.cards.pin(card_number),
-        `Card #${card_number} pinned`,
-      );
+      return wrapToolOperation(() => client.cards.pin(card_number), `Card #${card_number} pinned`);
     },
   );
 

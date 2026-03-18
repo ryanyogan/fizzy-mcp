@@ -1,18 +1,17 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "fizzy-docs",
-  // Set to today's date
-  "compatibility_date": "2026-03-11",
+  "name": "fizzy-mcp-docs",
+  "compatibility_date": "2026-03-17",
 
-  // Static site - no Worker script needed
+  // Static site - VitePress output
   "assets": {
-    "directory": "./dist",
+    "directory": "./.vitepress/dist",
   },
 
-  // Custom domain configuration
+  // Custom domain configuration - docs is the main site
   "routes": [
     {
-      "pattern": "docs.fizzy.yogan.dev",
+      "pattern": "fizzy.yogan.dev",
       "custom_domain": true,
     },
   ],

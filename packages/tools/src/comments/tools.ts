@@ -50,7 +50,9 @@ export function registerCommentTools(server: McpServer, client: FizzyClient): vo
       body: z
         .string()
         .min(1)
-        .describe('The comment body. Supports markdown (bold, italic, links, lists, code) or HTML.'),
+        .describe(
+          'The comment body. Supports markdown (bold, italic, links, lists, code) or HTML.',
+        ),
     },
     async ({ card_number, body }) => {
       return wrapToolOperation(
@@ -70,7 +72,9 @@ export function registerCommentTools(server: McpServer, client: FizzyClient): vo
       body: z
         .string()
         .min(1)
-        .describe('The new comment body. Supports markdown (bold, italic, links, lists, code) or HTML.'),
+        .describe(
+          'The new comment body. Supports markdown (bold, italic, links, lists, code) or HTML.',
+        ),
     },
     async ({ card_number, comment_id, body }) => {
       return wrapToolOperation(

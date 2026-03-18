@@ -1,0 +1,443 @@
+/**
+ * Fizzy MCP - Neobrutalist Design System
+ * 
+ * Inspired by the Project Nexus design:
+ * - Monochrome palette with cyan accent
+ * - Sharp corners (2px max)
+ * - Monospace typography (Geist Mono)
+ * - Pipe separators
+ * - Brutal shadows
+ */
+
+:root {
+  /* Fizzy brand colors */
+  --vp-c-brand-1: #22d3ee;
+  --vp-c-brand-2: #67e8f9;
+  --vp-c-brand-3: #06b6d4;
+  --vp-c-brand-soft: rgba(34, 211, 238, 0.14);
+
+  /* Typography - Geist Mono */
+  --vp-font-family-base:
+    'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --vp-font-family-mono:
+    'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Neobrutalist: minimal rounded corners */
+  --vp-border-radius: 2px;
+
+  /* Layout */
+  --vp-layout-max-width: 1200px;
+  --vp-sidebar-width: 272px;
+}
+
+/* Dark mode adjustments */
+.dark {
+  --vp-c-brand-1: #22d3ee;
+  --vp-c-brand-2: #67e8f9;
+  --vp-c-brand-3: #06b6d4;
+
+  /* Pure black background */
+  --vp-c-bg: #000000;
+  --vp-c-bg-soft: #0a0a0a;
+  --vp-c-bg-mute: #111111;
+  --vp-c-bg-alt: #0a0a0a;
+
+  /* Borders */
+  --vp-c-border: #262626;
+  --vp-c-divider: #262626;
+  --vp-c-gutter: #000000;
+
+  /* Text */
+  --vp-c-text-1: #ffffff;
+  --vp-c-text-2: #a3a3a3;
+  --vp-c-text-3: #737373;
+}
+
+/* Light mode */
+:root:not(.dark) {
+  --vp-c-bg: #ffffff;
+  --vp-c-bg-soft: #f5f5f5;
+  --vp-c-bg-mute: #e5e5e5;
+
+  --vp-c-border: #e5e5e5;
+  --vp-c-divider: #e5e5e5;
+
+  --vp-c-text-1: #000000;
+  --vp-c-text-2: #525252;
+  --vp-c-text-3: #737373;
+}
+
+/* =================================
+   TYPOGRAPHY
+   ================================= */
+
+/* Uppercase section titles with letter-spacing */
+.VPSidebar .title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--vp-c-text-2);
+}
+
+/* Headers styling */
+.vp-doc h1,
+.vp-doc h2,
+.vp-doc h3 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.vp-doc h1 {
+  font-size: 2.5rem;
+  border-bottom: 2px solid var(--vp-c-brand-1);
+  padding-bottom: 0.5em;
+}
+
+/* Code blocks */
+.vp-doc [class*='language-'] {
+  border-radius: 2px;
+  border: 1px solid var(--vp-c-border);
+}
+
+.vp-doc [class*='language-'] code {
+  font-family: var(--vp-font-family-mono);
+}
+
+/* Inline code */
+.vp-doc :not(pre) > code {
+  border-radius: 2px;
+  padding: 2px 6px;
+  background-color: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-border);
+  font-size: 0.9em;
+}
+
+/* =================================
+   BUTTONS - Brutal Style
+   ================================= */
+
+.VPButton.brand {
+  border-radius: 2px;
+  border: 2px solid var(--vp-c-brand-1);
+  background-color: var(--vp-c-brand-1);
+  color: #000000;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 3px 3px 0 0 var(--vp-c-brand-3);
+  transition:
+    transform 0.1s,
+    box-shadow 0.1s;
+}
+
+.VPButton.brand:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 0 var(--vp-c-brand-3);
+}
+
+.VPButton.brand:active {
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0 0 var(--vp-c-brand-3);
+}
+
+.VPButton.alt {
+  border-radius: 2px;
+  border: 2px solid var(--vp-c-border);
+  background-color: transparent;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.VPButton.alt:hover {
+  border-color: var(--vp-c-brand-1);
+  color: var(--vp-c-brand-1);
+}
+
+/* =================================
+   HERO SECTION
+   ================================= */
+
+.VPHero .name {
+  font-size: 4rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #22d3ee 0%, #67e8f9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.VPHero .text {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--vp-c-text-1);
+}
+
+.VPHero .tagline {
+  font-size: 1.1rem;
+  color: var(--vp-c-text-2);
+  max-width: 600px;
+}
+
+/* =================================
+   NAVIGATION
+   ================================= */
+
+/* Pipe separators in nav (achieved via pseudo-elements) */
+.VPNavBarMenu .VPNavBarMenuLink:not(:last-child)::after {
+  content: '|';
+  margin-left: 16px;
+  color: var(--vp-c-text-3);
+  font-weight: 300;
+}
+
+.VPNavBarTitle .title {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* =================================
+   SIDEBAR
+   ================================= */
+
+.VPSidebar {
+  background-color: var(--vp-c-bg);
+  border-right: 1px solid var(--vp-c-border);
+}
+
+.VPSidebarItem .link {
+  font-size: 13px;
+  border-radius: 2px;
+}
+
+.VPSidebarItem.is-active .link {
+  background-color: var(--vp-c-brand-soft);
+  color: var(--vp-c-brand-1);
+  font-weight: 600;
+}
+
+/* =================================
+   CARDS & CONTAINERS
+   ================================= */
+
+.vp-doc .custom-block {
+  border-radius: 2px;
+  border-left-width: 3px;
+}
+
+.vp-doc .custom-block.tip {
+  border-color: var(--vp-c-brand-1);
+  background-color: var(--vp-c-brand-soft);
+}
+
+.vp-doc .custom-block.warning {
+  border-color: #fbbf24;
+}
+
+.vp-doc .custom-block.danger {
+  border-color: #f87171;
+}
+
+/* =================================
+   TABLES
+   ================================= */
+
+.vp-doc table {
+  border-radius: 2px;
+  overflow: hidden;
+  border: 1px solid var(--vp-c-border);
+}
+
+.vp-doc th {
+  background-color: var(--vp-c-bg-soft);
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.vp-doc td,
+.vp-doc th {
+  border: 1px solid var(--vp-c-border);
+}
+
+/* =================================
+   FEATURE GRID (Home page)
+   ================================= */
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin: 48px 0;
+}
+
+.feature-card {
+  border: 1px solid var(--vp-c-border);
+  border-radius: 2px;
+  padding: 24px;
+  background-color: var(--vp-c-bg);
+  transition: border-color 0.2s;
+}
+
+.feature-card:hover {
+  border-color: var(--vp-c-brand-1);
+}
+
+.feature-card-icon {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--vp-c-brand-1);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 12px;
+}
+
+.feature-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--vp-c-text-1);
+}
+
+.feature-card-description {
+  font-size: 14px;
+  color: var(--vp-c-text-2);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* =================================
+   TERMINAL COMPONENT
+   ================================= */
+
+.terminal {
+  border: 1px solid var(--vp-c-border);
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 24px 0;
+  background-color: #0a0a0a;
+}
+
+.terminal-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: #111111;
+  border-bottom: 1px solid var(--vp-c-border);
+}
+
+.terminal-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.terminal-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #333333;
+}
+
+.terminal-title {
+  flex: 1;
+  text-align: center;
+  font-size: 12px;
+  color: var(--vp-c-text-3);
+  font-family: var(--vp-font-family-mono);
+}
+
+.terminal-copy {
+  background: none;
+  border: none;
+  color: var(--vp-c-text-3);
+  cursor: pointer;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.terminal-copy:hover {
+  color: var(--vp-c-brand-1);
+}
+
+.terminal-body {
+  padding: 16px;
+  font-family: var(--vp-font-family-mono);
+  font-size: 14px;
+  line-height: 1.6;
+  color: #e5e5e5;
+}
+
+.terminal-line {
+  display: block;
+}
+
+.terminal-line.prompt::before {
+  content: '$ ';
+  color: var(--vp-c-brand-1);
+}
+
+.terminal-line.output {
+  color: #a3a3a3;
+}
+
+.terminal-line .text-cyan {
+  color: var(--vp-c-brand-1);
+}
+
+.terminal-line .text-muted {
+  color: #737373;
+}
+
+.terminal-line .text-bold {
+  font-weight: 600;
+}
+
+/* =================================
+   SEARCH
+   ================================= */
+
+.VPLocalSearchBox {
+  border-radius: 2px !important;
+}
+
+.VPLocalSearchBox input {
+  border-radius: 2px !important;
+}
+
+/* =================================
+   FOOTER
+   ================================= */
+
+.VPFooter {
+  border-top: 1px solid var(--vp-c-border);
+}
+
+.VPFooter .message,
+.VPFooter .copyright {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* =================================
+   RESPONSIVE
+   ================================= */
+
+@media (max-width: 768px) {
+  .VPHero .name {
+    font-size: 2.5rem;
+  }
+
+  .VPHero .text {
+    font-size: 1.5rem;
+  }
+
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -132,10 +132,7 @@ export async function fromPromise<T, E = Error>(
 /**
  * Wraps a function that might throw into a Result.
  */
-export function fromTry<T, E = Error>(
-  fn: () => T,
-  mapError?: (error: unknown) => E,
-): Result<T, E> {
+export function fromTry<T, E = Error>(fn: () => T, mapError?: (error: unknown) => E): Result<T, E> {
   try {
     const value = fn();
     return Ok(value);

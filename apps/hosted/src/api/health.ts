@@ -1,7 +1,6 @@
 import { Hono } from 'hono';
 import type { HonoEnv } from '../types';
 import { SERVER_INFO } from '../mcp/server';
-import { DEFAULT_SETTINGS } from '../services/settings';
 
 /**
  * Health and info routes (public)
@@ -21,71 +20,39 @@ healthRoutes.get('/health', (c) => {
 
 /**
  * Public info endpoint
- * Returns service information and tier limits
  */
 healthRoutes.get('/info', (c) => {
   return c.json({
     service: {
       name: SERVER_INFO.name,
       version: SERVER_INFO.version,
-      description: 'Hosted MCP server for Fizzy task management',
+      description: 'Open source MCP server for Fizzy task management',
     },
     endpoints: {
       mcp: '/mcp',
-      api: '/api',
+      health: '/health',
       docs: 'https://fizzy.yogan.dev',
-    },
-    tiers: {
-      anonymous: {
-        dailyWrites: DEFAULT_SETTINGS.anonymous_daily_limit,
-        description: 'No authentication required, limited access',
-      },
-      authenticated: {
-        dailyWrites: DEFAULT_SETTINGS.authenticated_daily_limit,
-        description: 'Create an account and API key for higher limits',
-      },
-      admin: {
-        dailyWrites: 'unlimited',
-        description: 'Full access to all features',
-      },
     },
     authentication: {
       fizzyToken: {
         header: 'X-Fizzy-Token',
-        description: 'Your Fizzy API token (required for MCP access)',
+        description: 'Your Fizzy personal access token (required)',
+        howToGet: 'https://app.fizzy.do → Profile → API → Personal Access Tokens',
       },
-      apiKey: {
-        header: 'X-API-Key',
-        description: 'Platform API key for higher limits (optional)',
-        prefix: 'fmcp_',
+      accountSlug: {
+        header: 'X-Fizzy-Account-Slug',
+        description: 'Account slug (optional, auto-detected if not provided)',
       },
     },
+    github: 'https://github.com/ryanyogan/fizzy-mcp',
   });
 });
 
 /**
  * Ready check for load balancers
  */
-healthRoutes.get('/ready', async (c) => {
-  try {
-    // Quick D1 connectivity check
-    await c.env.DB.prepare('SELECT 1').first();
-
-    return c.json({
-      status: 'ready',
-      checks: {
-        database: 'ok',
-      },
-    });
-  } catch (error) {
-    return c.json(
-      {
-        status: 'not_ready',
-        checks: {
-          database: 'error',
-        },
-      },
-      503,
-    );
-  }
+healthRoutes.get('/ready', (c) => {
+  return c.json({
+    status: 'ready',
+  });
 });

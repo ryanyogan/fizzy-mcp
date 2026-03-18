@@ -1,6 +1,11 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vite-plus/test';
 import { withRetry, DEFAULT_RETRY_CONFIG } from './retry.js';
-import { FizzyApiError, FizzyNetworkError, FizzyRateLimitError, FizzyAuthError } from '@fizzy-mcp/shared';
+import {
+  FizzyApiError,
+  FizzyNetworkError,
+  FizzyRateLimitError,
+  FizzyAuthError,
+} from '@fizzy-mcp/shared';
 
 describe('withRetry', () => {
   beforeEach(() => {

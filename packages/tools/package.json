@@ -12,14 +12,16 @@
       "types": "./dist/index.d.ts"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "build": "vp pack",
+    "dev": "vp pack --watch",
+    "test": "vp test",
+    "test:watch": "vp test --watch",
     "typecheck": "tsc --noEmit",
-    "clean": "rm -rf dist .turbo"
+    "clean": "rm -rf dist"
   },
   "dependencies": {
     "@fizzy-mcp/client": "workspace:*",
@@ -28,8 +30,7 @@
     "zod": "^3.24.0"
   },
   "devDependencies": {
-    "tsup": "^8.3.0",
     "typescript": "^5.7.0",
-    "vitest": "^2.1.0"
+    "vite-plus": "catalog:"
   }
 }

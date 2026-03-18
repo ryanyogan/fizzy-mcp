@@ -41,7 +41,6 @@ export {
 export {
   FizzyConfigSchema,
   StoredConfigSchema,
-  ServerModeSchema,
   DEFAULT_CONFIG,
   ENV_VARS,
   CONFIG_PATHS,
@@ -49,7 +48,6 @@ export {
   FIZZY_TOKEN_URL,
   type FizzyConfig,
   type StoredConfig,
-  type ServerMode,
 } from './config.js';
 
 // All Zod schemas and types

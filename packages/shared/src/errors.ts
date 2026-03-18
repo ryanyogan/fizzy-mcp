@@ -22,8 +22,12 @@ export abstract class FizzyError extends Error {
     this.name = this.constructor.name;
 
     // Maintains proper stack trace for where our error was thrown (V8 engines)
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, this.constructor);
+    if ('captureStackTrace' in Error) {
+      (
+        Error as {
+          captureStackTrace?: (err: Error, constructor: Function) => void;
+        }
+      ).captureStackTrace?.(this, this.constructor);
     }
   }
 

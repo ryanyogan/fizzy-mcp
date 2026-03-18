@@ -42,11 +42,7 @@ export { FetchHttpClient } from './http/fetch-client.js';
 export { withRetry, DEFAULT_RETRY_CONFIG, type RetryConfig } from './http/retry.js';
 
 // Endpoint classes (for extension)
-export {
-  BaseEndpoint,
-  GlobalEndpoint,
-  type EndpointContext,
-} from './endpoints/base.js';
+export { BaseEndpoint, GlobalEndpoint, type EndpointContext } from './endpoints/base.js';
 export { IdentityEndpoint, AccountEndpoint } from './endpoints/identity.js';
 export { BoardsEndpoint } from './endpoints/boards.js';
 export { ColumnsEndpoint } from './endpoints/columns.js';

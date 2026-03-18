@@ -2,23 +2,45 @@
  * Spinner utilities for the Fizzy MCP CLI.
  *
  * Provides a consistent loading spinner experience with Fizzy branding.
+ * Uses fun spinner animations that match the Fizzy aesthetic.
  */
 
-import ora, { type Ora } from 'ora';
+import ora, { type Ora, type Spinner } from 'ora';
 import { colors } from './branding.js';
 
 /**
- * Fizzy-branded spinner configuration.
+ * Custom Fizzy spinner frames - bubbly and playful
  */
-const SPINNER_CONFIG = {
-  spinner: 'dots' as const,
-  color: 'cyan' as const,
+const FIZZY_SPINNER: Spinner = {
+  interval: 80,
+  frames: ['◐', '◓', '◑', '◒'],
+};
+
+/**
+ * Alternative spinner styles
+ */
+const SPINNERS: Record<string, Spinner | string> = {
+  fizzy: FIZZY_SPINNER,
+  dots: 'dots',
+  bubbles: {
+    interval: 120,
+    frames: ['○', '◔', '◑', '◕', '●', '◕', '◑', '◔'],
+  },
+  bounce: {
+    interval: 100,
+    frames: ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'],
+  },
+  sparkle: {
+    interval: 100,
+    frames: ['✦', '✧', '✦', '✧', '⋆', '✧', '✦', '✧'],
+  },
 };
 
 /**
  * Creates a new spinner with Fizzy branding.
  *
  * @param text - Initial spinner text
+ * @param spinnerStyle - Optional spinner style to use
  * @returns Ora spinner instance
  *
  * @example
@@ -29,10 +51,13 @@ const SPINNER_CONFIG = {
  * spinner.succeed('Token validated');
  * ```
  */
-export function createSpinner(text: string): Ora {
+export function createSpinner(text: string, spinnerStyle = 'fizzy'): Ora {
+  const spinner = SPINNERS[spinnerStyle] ?? FIZZY_SPINNER;
   return ora({
     text,
-    ...SPINNER_CONFIG,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    spinner: spinner as any,
+    color: 'cyan',
   });
 }
 
@@ -59,9 +84,10 @@ export async function withSpinner<T>(
   options?: {
     success?: string | ((result: T) => string);
     failure?: string | ((error: Error) => string);
+    spinnerStyle?: string;
   },
 ): Promise<T> {
-  const spinner = createSpinner(text);
+  const spinner = createSpinner(text, options?.spinnerStyle);
   spinner.start();
 
   try {

@@ -2,13 +2,19 @@
  * Branding utilities for the Fizzy MCP CLI.
  *
  * Provides consistent styling with the Fizzy brand colors:
- * - Primary: Cyan (#22d3ee)
+ * - Primary gradient: Cyan (#22d3ee) → Light Cyan (#67e8f9)
  * - Background: Dark teal (#0d181d)
  */
 
 import chalk from 'chalk';
 import figlet from 'figlet';
 import boxen from 'boxen';
+import gradient from 'gradient-string';
+
+/**
+ * Fizzy brand gradient - cyan to light cyan
+ */
+const fizzyGradient = gradient(['#22d3ee', '#67e8f9']);
 
 /**
  * Fizzy brand colors.
@@ -26,40 +32,59 @@ export const colors = {
 } as const;
 
 /**
- * ASCII art logo for Fizzy MCP.
- * Uses bubbles style for a playful, bubbly look.
+ * ASCII art logo for Fizzy MCP with gradient coloring.
  */
 export function getLogo(): string {
   try {
-    const logo = figlet.textSync('Fizzy', {
-      font: 'Standard',
+    const logo = figlet.textSync('FIZZY', {
+      font: 'ANSI Shadow',
       horizontalLayout: 'default',
     });
-    return colors.primary(logo);
+    return fizzyGradient.multiline(logo);
   } catch {
-    // Fallback if figlet fails
-    return colors.primary(`
-  _____ _               
- |  ___(_)_________   _ 
- | |_  | |_  /_  / | | |
- |  _| | |/ / / /| |_| |
- |_|   |_/___/___|\__, |
-                  |___/ 
-`);
+    // Fallback with simpler font
+    try {
+      const logo = figlet.textSync('FIZZY', {
+        font: 'Standard',
+        horizontalLayout: 'default',
+      });
+      return fizzyGradient.multiline(logo);
+    } catch {
+      // Final fallback - manual ASCII art
+      const fallback = `
+ ███████╗██╗███████╗███████╗██╗   ██╗
+ ██╔════╝██║╚══███╔╝╚══███╔╝╚██╗ ██╔╝
+ █████╗  ██║  ███╔╝   ███╔╝  ╚████╔╝ 
+ ██╔══╝  ██║ ███╔╝   ███╔╝    ╚██╔╝  
+ ██║     ██║███████╗███████╗   ██║   
+ ╚═╝     ╚═╝╚══════╝╚══════╝   ╚═╝   
+`;
+      return fizzyGradient.multiline(fallback);
+    }
   }
 }
 
 /**
- * Displays the Fizzy MCP banner with logo and tagline.
+ * Compact ASCII logo for smaller displays.
+ */
+export function getCompactLogo(): string {
+  const logo = `
+╭─────────────────────────────────────╮
+│  ⚡ FIZZY MCP                       │
+│  AI-Powered Task Management         │
+╰─────────────────────────────────────╯`;
+  return fizzyGradient.multiline(logo);
+}
+
+/**
+ * Displays the Fizzy MCP banner with gradient logo and tagline.
  */
 export function showBanner(): void {
-  const logo = getLogo();
-  const tagline = colors.muted('AI-powered task management for the modern team');
-  const version = colors.muted(`v${process.env.npm_package_version || '0.1.0'}`);
-
-  console.error(logo);
-  console.error(tagline);
-  console.error(version);
+  console.error('');
+  console.error(getLogo());
+  console.error('');
+  console.error(colors.muted('  AI-powered task management for the modern team'));
+  console.error(colors.muted(`  v${process.env.npm_package_version || '0.2.0'}`));
   console.error('');
 }
 
